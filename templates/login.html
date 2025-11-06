@@ -136,6 +136,14 @@
           <option value="parent">Parent</option>
         </select>
       </div>
+      <div class="form-group">
+        <label>User Type</label>
+        <select id="regUserType">
+          <option value="student">Student (K-12)</option>
+          <option value="college">College Student</option>
+          <option value="corporate">Corporate Worker</option>
+        </select>
+      </div>
       <div class="form-group" id="parentCodeGroup">
         <label>Parent ID (ask your parent)</label>
         <input type="number" id="parentCode">
@@ -148,13 +156,15 @@
 
   <script>
     function showTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
       
       if (tab === 'login') {
+        tabs[0].classList.add('active');
         document.getElementById('loginForm').classList.remove('hidden');
         document.getElementById('registerForm').classList.add('hidden');
       } else {
+        tabs[1].classList.add('active');
         document.getElementById('loginForm').classList.add('hidden');
         document.getElementById('registerForm').classList.remove('hidden');
       }
@@ -170,26 +180,34 @@
       e.preventDefault();
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
-
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username, password})
-      });
-
-      const data = await response.json();
       const msg = document.getElementById('message');
-      
-      if (data.success) {
-        msg.className = 'message success';
-        msg.textContent = 'Login successful!';
-        msg.style.display = 'block';
-        setTimeout(() => {
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username, password})
+        });
+
+        const data = await response.json();
+        console.log('Login response:', data);
+        
+        if (data.success) {
+          msg.className = 'message success';
+          msg.textContent = 'Login successful! Redirecting...';
+          msg.style.display = 'block';
+          
+          // Direct redirect
           window.location.href = data.role === 'parent' ? '/parent_dashboard' : '/child_dashboard';
-        }, 1000);
-      } else {
+        } else {
+          msg.className = 'message error';
+          msg.textContent = data.message || 'Invalid username or password';
+          msg.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
         msg.className = 'message error';
-        msg.textContent = data.message;
+        msg.textContent = 'Connection error. Make sure the server is running.';
         msg.style.display = 'block';
       }
     });
@@ -200,24 +218,37 @@
       const password = document.getElementById('regPassword').value;
       const role = document.getElementById('regRole').value;
       const parent_code = document.getElementById('parentCode').value;
-
-      const response = await fetch('/register', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username, password, role, parent_code})
-      });
-
-      const data = await response.json();
+      const user_type = document.getElementById('regUserType').value;
       const msg = document.getElementById('message');
-      
-      if (data.success) {
-        msg.className = 'message success';
-        msg.textContent = role === 'parent' ? `Registration successful! Your Parent ID is: ${data.user_id}` : 'Registration successful! Please login.';
-        msg.style.display = 'block';
-        setTimeout(() => showTab('login'), 2000);
-      } else {
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username, password, role, parent_code, user_type})
+        });
+
+        const data = await response.json();
+        console.log('Register response:', data);
+        
+        if (data.success) {
+          msg.className = 'message success';
+          msg.textContent = role === 'parent' ? `Success! Your Parent ID: ${data.user_id}` : 'Registration successful!';
+          msg.style.display = 'block';
+          
+          setTimeout(() => {
+            showTab('login');
+            document.getElementById('loginUsername').value = username;
+          }, 1500);
+        } else {
+          msg.className = 'message error';
+          msg.textContent = data.message || 'Registration failed';
+          msg.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Register error:', error);
         msg.className = 'message error';
-        msg.textContent = data.message;
+        msg.textContent = 'Connection error. Make sure the server is running.';
         msg.style.display = 'block';
       }
     });

@@ -13,6 +13,7 @@ def init_db():
         password TEXT NOT NULL,
         role TEXT NOT NULL,
         parent_id INTEGER,
+        user_type TEXT DEFAULT 'child',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )''')
     
@@ -43,12 +44,12 @@ def init_db():
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def create_user(username, password, role, parent_id=None):
+def create_user(username, password, role, parent_id=None, user_type='child'):
     conn = sqlite3.connect('neurolens.db')
     c = conn.cursor()
     try:
-        c.execute('INSERT INTO users (username, password, role, parent_id) VALUES (?, ?, ?, ?)',
-                  (username, hash_password(password), role, parent_id))
+        c.execute('INSERT INTO users (username, password, role, parent_id, user_type) VALUES (?, ?, ?, ?, ?)',
+                  (username, hash_password(password), role, parent_id, user_type))
         conn.commit()
         return c.lastrowid
     except sqlite3.IntegrityError:
@@ -59,7 +60,7 @@ def create_user(username, password, role, parent_id=None):
 def verify_user(username, password):
     conn = sqlite3.connect('neurolens.db')
     c = conn.cursor()
-    c.execute('SELECT id, role, parent_id FROM users WHERE username = ? AND password = ?',
+    c.execute('SELECT id, role, parent_id, user_type FROM users WHERE username = ? AND password = ?',
               (username, hash_password(password)))
     result = c.fetchone()
     conn.close()

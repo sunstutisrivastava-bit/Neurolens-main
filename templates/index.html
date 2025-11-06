@@ -10,47 +10,116 @@
     * {margin: 0; padding: 0; box-sizing: border-box;}
     body {
       font-family: "Exo 2", sans-serif;
-      background: 
-        url('https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed,
-        linear-gradient(135deg, rgba(0,0,0,0.8), rgba(10,15,36,0.9), rgba(27,27,30,0.8));
-      background-blend-mode: overlay;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+      background-attachment: fixed;
       color: #FFFFFF;
       overflow-x: hidden;
       line-height: 1.6;
       min-height: 100vh;
+      transition: background 2s ease, filter 1s ease;
+      position: relative;
     }
+    body:before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(0,245,255,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(184,41,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body.emotion-happy { background: linear-gradient(135deg, #FFD166, #F6AE2D, #FF9F1C); }
+    body.emotion-sad { background: linear-gradient(135deg, #118AB2, #06D6A0, #073B4C); }
+    body.emotion-angry { background: linear-gradient(135deg, #EF476F, #FF7C7C, #D62828); }
+    body.emotion-fear { background: linear-gradient(135deg, #9B5DE5, #F15BB5, #7209B7); }
+    body.emotion-surprised { background: linear-gradient(135deg, #00F5D4, #00BBF9, #0077B6); }
+    body.emotion-neutral { background: linear-gradient(135deg, #F8F9FA, #E0E0E0, #ADB5BD); filter: brightness(0.7); }
 
     /* Navigation */
-    .nav {
+    .emotion-indicator {
       position: fixed;
       top: 20px;
-      left: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      background: rgba(27,27,30,0.95);
+      border: 3px solid #00F5FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      z-index: 2000;
+      animation: pulse 2s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(0,245,255,0.5);
+    }
+
+    .nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      width: 220px;
+      background: linear-gradient(180deg, rgba(10,14,39,0.95) 0%, rgba(26,26,46,0.95) 100%);
+      border-right: 1px solid rgba(0,245,255,0.2);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5), inset -1px 0 0 rgba(0,245,255,0.1);
       z-index: 1000;
       display: flex;
-      gap: 1rem;
+      flex-direction: column;
+      padding: 2rem 0;
+      gap: 0.3rem;
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+    }
+    .nav:before {
+      content: '🧠';
+      font-size: 3rem;
+      text-align: center;
+      padding: 1rem 0 2rem;
+      border-bottom: 1px solid rgba(0,245,255,0.2);
+      margin-bottom: 1rem;
     }
 
     .nav-btn {
       font-family: "Rajdhani", sans-serif;
-      background: linear-gradient(45deg, #1A75FF, #B829FF);
-      border: 1px solid rgba(0,245,255,0.3);
-      padding: 12px 24px;
-      color: #FFFFFF;
+      background: transparent;
+      border: none;
+      border-left: 3px solid transparent;
+      padding: 14px 24px;
+      color: rgba(255,255,255,0.7);
       font-weight: 600;
       text-transform: uppercase;
-      border-radius: 25px;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: all 0.3s ease;
-      letter-spacing: 1px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 1.5px;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
     }
-
+    .nav-btn:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, rgba(0,245,255,0.2), transparent);
+      transition: width 0.4s ease;
+    }
     .nav-btn:hover {
-      background: linear-gradient(45deg, #00F5FF, #FF3CAC);
-      transform: translateY(-2px);
-      box-shadow: 0px 8px 20px rgba(0,245,255,0.4);
+      color: #00F5FF;
+      background: rgba(0,245,255,0.05);
+      border-left-color: #00F5FF;
+      transform: translateX(8px);
+      box-shadow: 0 0 20px rgba(0,245,255,0.2);
     }
-
+    .nav-btn:hover:before {
+      width: 100%;
+    }
     /* Landing Page */
     .landing-page {
       min-height: 100vh;
@@ -60,8 +129,10 @@
       align-items: center;
       text-align: center;
       padding: 2rem;
+      margin-left: 220px;
+      position: relative;
+      z-index: 1;
     }
-
     .logo {
       font-family: "Orbitron", monospace;
       font-size: clamp(4rem, 10vw, 8rem);
@@ -75,13 +146,13 @@
       text-transform: uppercase;
       animation: gradientShift 3s ease-in-out infinite;
       margin-bottom: 2rem;
+      filter: drop-shadow(0 0 30px rgba(0,245,255,0.5));
+      text-shadow: 0 0 80px rgba(0,245,255,0.8);
     }
-
     @keyframes gradientShift {
       0%, 100% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
     }
-
     .tagline {
       font-family: "Rajdhani", sans-serif;
       font-size: clamp(1.5rem, 4vw, 2.5rem);
@@ -91,7 +162,6 @@
       color: #00F5FF;
       margin-bottom: 3rem;
     }
-
     .features {
       display: flex;
       flex-direction: column;
@@ -100,44 +170,58 @@
       letter-spacing: 2px;
       opacity: 0.8;
     }
-
     /* Detection Page */
     .detection-page {
       display: none;
-      padding: 100px 2rem 2rem 2rem;
+      padding: 2rem 2rem 2rem 2rem;
       min-height: 100vh;
+      margin-left: 220px;
+      position: relative;
+      z-index: 1;
     }
-
     .detection-container {
       max-width: 1200px;
       margin: 0 auto;
     }
-
     .controls {
       text-align: center;
       margin-bottom: 3rem;
     }
-
     .main-btn {
       font-family: "Rajdhani", sans-serif;
-      background: linear-gradient(45deg, #1A75FF, #B829FF);
-      border: 1px solid rgba(0,245,255,0.3);
-      padding: 20px 50px;
+      background: linear-gradient(135deg, #1A75FF, #B829FF);
+      border: 1px solid rgba(0,245,255,0.4);
+      padding: 18px 45px;
       color: #FFFFFF;
       font-weight: 700;
       text-transform: uppercase;
       border-radius: 50px;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       letter-spacing: 2px;
       margin: 0 1rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(26,117,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
     }
-
+    .main-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
     .main-btn:hover {
-      background: linear-gradient(45deg, #00F5FF, #FF3CAC);
-      transform: translateY(-3px);
-      box-shadow: 0px 15px 30px rgba(0,245,255,0.5);
+      background: linear-gradient(135deg, #00F5FF, #FF3CAC);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0,245,255,0.6), 0 0 30px rgba(0,245,255,0.4);
+    }
+    .main-btn:hover:before {
+      left: 100%;
     }
 
     .media-container {
@@ -148,11 +232,19 @@
     }
 
     .media-section {
-      background: rgba(27,27,30,0.9);
-      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(10,14,39,0.8), rgba(26,26,46,0.8));
+      border-radius: 24px;
       padding: 2rem;
-      border: 1px solid rgba(0,245,255,0.2);
+      border: 1px solid rgba(0,245,255,0.3);
       text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: all 0.4s ease;
+    }
+    .media-section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 48px rgba(0,245,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      border-color: rgba(0,245,255,0.5);
     }
 
     .media-title {
@@ -173,11 +265,13 @@
 
     .chart-container {
       display: none;
-      background: rgba(27,27,30,0.9);
-      border-radius: 20px;
-      padding: 2rem;
-      border: 1px solid rgba(0,245,255,0.2);
+      background: linear-gradient(135deg, rgba(10,14,39,0.9), rgba(26,26,46,0.9));
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid rgba(0,245,255,0.3);
       text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
     .chart-title {
@@ -233,6 +327,78 @@
     .recording .wave {
       animation-play-state: running;
       opacity: 1;
+    }
+
+    .companion-avatar {
+      position: fixed;
+      bottom: 20px;
+      left: 240px;
+      width: 120px;
+      height: 120px;
+      background: rgba(27,27,30,0.95);
+      border: 2px solid #00F5FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      cursor: pointer;
+      z-index: 999;
+      transition: all 0.5s ease;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .companion-avatar:hover {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow: 0 0 30px rgba(0,245,255,0.6);
+    }
+
+    .companion-message {
+      position: fixed;
+      bottom: 150px;
+      left: 240px;
+      max-width: 300px;
+      background: rgba(27,27,30,0.95);
+      border: 1px solid #00F5FF;
+      border-radius: 15px;
+      padding: 15px;
+      color: #FFFFFF;
+      display: none;
+      z-index: 999;
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .companion-text {
+      color: #00F5FF;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .companion-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .companion-btn {
+      flex: 1;
+      padding: 8px;
+      background: linear-gradient(45deg, #1A75FF, #B829FF);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
     }
 
     .chat-toggle {
@@ -334,10 +500,321 @@
       cursor: pointer;
     }
 
+    .productivity-alert {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      width: 350px;
+      background: rgba(27,27,30,0.95);
+      border: 2px solid #FF3CAC;
+      border-radius: 15px;
+      padding: 20px;
+      z-index: 1002;
+      display: none;
+      backdrop-filter: blur(10px);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .alert-header {
+      font-size: 1.2rem;
+      color: #FF3CAC;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .alert-message {
+      color: #00F5FF;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .alert-suggestions {
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .suggestion-item {
+      color: #FFFFFF;
+      margin: 8px 0;
+      padding-left: 15px;
+      position: relative;
+    }
+
+    .suggestion-item:before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #00F5FF;
+    }
+
+    .alert-close {
+      background: linear-gradient(45deg, #1A75FF, #B829FF);
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .forecast-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .forecast-content {
+      background: rgba(27,27,30,0.95);
+      border: 2px solid #00F5FF;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 90%;
+    }
+
+    .forecast-title {
+      font-family: "Orbitron", monospace;
+      font-size: 2rem;
+      background: linear-gradient(45deg, #00F5FF, #B829FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .forecast-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      border-left: 3px solid #00F5FF;
+    }
+
+    .forecast-section h3 {
+      color: #00F5FF;
+      margin-bottom: 10px;
+    }
+
+    .warning-item {
+      color: #FF3CAC;
+      margin: 8px 0;
+      padding: 8px;
+      background: rgba(255,60,172,0.1);
+      border-radius: 5px;
+    }
+
+    .pattern-item {
+      color: #B829FF;
+      margin: 8px 0;
+    }
+
+    .recommendation-item {
+      color: #00F5FF;
+      margin: 8px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .recommendation-item:before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #00FF00;
+    }
+
+    .risk-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .risk-low { background: rgba(0,255,0,0.2); color: #00FF00; }
+    .risk-medium { background: rgba(255,165,0,0.2); color: #FFA500; }
+    .risk-high { background: rgba(255,0,0,0.2); color: #FF0000; }
+
+    .color-dashboard {
+      display: none;
+      padding: 2rem 2rem 2rem 2rem;
+      min-height: 100vh;
+      margin-left: 220px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .color-title {
+      font-family: "Orbitron", monospace;
+      font-size: 3rem;
+      text-align: center;
+      background: linear-gradient(45deg, #00F5FF, #B829FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 3rem;
+    }
+
+    .color-wave-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(27,27,30,0.9);
+      border-radius: 20px;
+      padding: 3rem;
+      border: 1px solid rgba(0,245,255,0.2);
+    }
+
+    .emotion-wave {
+      display: flex;
+      height: 150px;
+      align-items: flex-end;
+      gap: 8px;
+      margin: 2rem 0;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 15px;
+    }
+
+    .wave-bar {
+      flex: 1;
+      border-radius: 10px 10px 0 0;
+      transition: all 0.5s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .wave-bar:hover {
+      transform: translateY(-10px);
+      filter: brightness(1.3);
+    }
+
+    .wave-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: #FFFFFF;
+      white-space: nowrap;
+    }
+
+    .emotion-legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+    }
+
+    .legend-color {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .twin-page { display: none; padding: 2rem; min-height: 100vh; margin-left: 220px; position: relative; z-index: 1; }
+    .twin-container { max-width: 1000px; margin: 0 auto; }
+    .twin-avatar { width: 200px; height: 200px; margin: 0 auto 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; border: 3px solid; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .twin-message { background: rgba(27,27,30,0.9); border-radius: 20px; padding: 2rem; margin: 2rem 0; border: 1px solid; font-size: 1.3rem; line-height: 1.8; text-align: center; }
+    .twin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .stat-card { background: rgba(27,27,30,0.9); border-radius: 15px; padding: 1.5rem; border: 1px solid rgba(0,245,255,0.2); text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: bold; color: #00F5FF; }
+    .stat-label { color: #FFFFFF; margin-top: 0.5rem; }
+    .challenge-page { display: none; padding: 2rem; min-height: 100vh; margin-left: 220px; position: relative; z-index: 1; }
+    .challenge-card { background: rgba(27,27,30,0.9); border-radius: 20px; padding: 3rem; margin: 2rem auto; max-width: 600px; border: 3px solid #FFD54F; animation: glow 2s ease-in-out infinite; }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(255,213,79,0.5); } 50% { box-shadow: 0 0 40px rgba(255,213,79,0.8); } }
+    .challenge-title { font-size: 2rem; color: #FFD54F; text-align: center; margin-bottom: 1rem; }
+    .challenge-desc { font-size: 1.2rem; color: #FFFFFF; text-align: center; margin-bottom: 2rem; }
+    .challenge-timer { font-size: 3rem; color: #00F5FF; text-align: center; margin: 2rem 0; font-weight: bold; }
+    .coins-display { position: fixed; top: 80px; right: 20px; background: rgba(27,27,30,0.9); padding: 15px 25px; border-radius: 15px; border: 2px solid #FFD54F; font-size: 1.5rem; color: #FFD54F; }
+    .reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(27,27,30,0.95); padding: 3rem; border-radius: 20px; border: 3px solid #00FF00; display: none; z-index: 3000; text-align: center; animation: popIn 0.5s ease; }
+    @keyframes popIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+    @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+    .breathe-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(155,93,229,0.3), transparent); animation: breathe 4s ease-in-out infinite; display: none; z-index: 100; pointer-events: none; }
+    .empathy-win { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,255,0,0.1); border: 3px solid #00FF00; border-radius: 20px; padding: 3rem; text-align: center; display: none; z-index: 3000; animation: popIn 0.5s ease; }
+    .empathy-win h2 { color: #00FF00; font-size: 2.5rem; margin-bottom: 1rem; }
+    .confetti { position: fixed; width: 10px; height: 10px; background: #FFD166; border-radius: 50%; animation: fall 3s linear; z-index: 2999; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+    .biosync-page { display: none; padding: 2rem; min-height: 100vh; margin-left: 220px; position: relative; z-index: 1; }
+    .biosync-container { max-width: 1000px; margin: 0 auto; }
+    .health-score { width: 200px; height: 200px; margin: 2rem auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; border: 5px solid; animation: pulse 2s ease-in-out infinite; }
+    .bio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+    .bio-card { background: rgba(27,27,30,0.9); border-radius: 15px; padding: 1.5rem; border: 2px solid rgba(0,245,255,0.3); text-align: center; }
+    .bio-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .bio-value { font-size: 2rem; font-weight: bold; color: #00F5FF; }
+    .bio-label { color: #FFFFFF; margin-top: 0.5rem; font-size: 0.9rem; }
+    .resilience-page { display: none; padding: 2rem; min-height: 100vh; margin-left: 220px; position: relative; z-index: 1; }
+    .resilience-container { max-width: 1000px; margin: 0 auto; text-align: center; }
+    .resilience-tree { width: 300px; height: 300px; margin: 2rem auto; position: relative; transition: all 1s ease; }
+    .tree-trunk { width: 40px; height: 120px; background: linear-gradient(180deg, #8B4513, #654321); position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); border-radius: 5px; }
+    .tree-leaves { width: 200px; height: 200px; border-radius: 50%; position: absolute; top: 0; left: 50%; transform: translateX(-50%); transition: all 1s ease; }
+    .tree-sprout .tree-leaves { width: 80px; height: 80px; background: radial-gradient(circle, #90EE90, #228B22); }
+    .tree-sapling .tree-leaves { width: 140px; height: 140px; background: radial-gradient(circle, #7CFC00, #32CD32); }
+    .tree-young .tree-leaves { width: 200px; height: 200px; background: radial-gradient(circle, #00FF00, #008000); }
+    .tree-flourishing .tree-leaves { width: 250px; height: 250px; background: radial-gradient(circle, #00FF7F, #00FA9A); box-shadow: 0 0 40px rgba(0,255,127,0.6); animation: treeGlow 2s ease-in-out infinite; }
+    @keyframes treeGlow { 0%, 100% { box-shadow: 0 0 40px rgba(0,255,127,0.6); } 50% { box-shadow: 0 0 60px rgba(0,255,127,0.9); } }
+    .resilience-score-display { font-size: 4rem; font-weight: bold; color: #00FF00; margin: 2rem 0; }
+    .goal-card { background: rgba(27,27,30,0.9); border-radius: 20px; padding: 2rem; margin: 2rem auto; max-width: 600px; border: 2px solid #FFD54F; }
+    .goal-text { font-size: 1.3rem; color: #FFFFFF; line-height: 1.8; }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .metric-card { background: rgba(27,27,30,0.9); border-radius: 15px; padding: 1.5rem; border: 1px solid rgba(0,245,255,0.3); }
+    .metric-value { font-size: 2rem; font-weight: bold; color: #00F5FF; }
+    .metric-label { color: #FFFFFF; margin-top: 0.5rem; font-size: 0.9rem; }
+    .forecast-page { display: none; padding: 2rem; min-height: 100vh; margin-left: 220px; position: relative; z-index: 1; }
+    .forecast-container { max-width: 1000px; margin: 0 auto; text-align: center; }
+    .weather-card { background: rgba(27,27,30,0.9); border-radius: 20px; padding: 2rem; margin: 1rem; border: 2px solid; display: inline-block; min-width: 250px; transition: all 0.3s ease; }
+    .weather-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,245,255,0.3); }
+    .weather-emoji { font-size: 5rem; margin: 1rem 0; }
+    .weather-day { font-size: 1.5rem; color: #00F5FF; font-weight: bold; margin-bottom: 0.5rem; }
+    .weather-mood { font-size: 1.8rem; color: #FFFFFF; margin: 0.5rem 0; }
+    .weather-tip { font-size: 1rem; color: #B829FF; margin-top: 1rem; line-height: 1.6; }
+    .mindroom-page { display: none; min-height: 100vh; position: relative; overflow: hidden; transition: background 3s ease; margin-left: 220px; z-index: 1; }
+    .mindroom-container { max-width: 800px; margin: 0 auto; padding: 100px 2rem 2rem; text-align: center; position: relative; z-index: 10; }
+    .breathing-circle { width: 300px; height: 300px; margin: 3rem auto; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.3), transparent); animation: breathe 4s ease-in-out infinite; box-shadow: 0 0 60px rgba(255,255,255,0.4); }
+    @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; } }
+    .particle { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 50%; animation: float-particle 8s ease-in-out infinite; }
+    @keyframes float-particle { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-30px) translateX(20px); } }
+    .anchor-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeIn 0.3s ease; }
+    .anchor-content { background: rgba(27,27,30,0.95); border-radius: 20px; padding: 2rem; max-width: 500px; width: 90%; text-align: center; border: 2px solid; }
+    .anchor-image { width: 100%; max-height: 300px; object-fit: cover; border-radius: 15px; margin: 1rem 0; }
+    .anchor-input { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,245,255,0.3); border-radius: 10px; color: white; margin: 1rem 0; font-size: 1rem; }
+    .anchor-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; padding: 2rem; }
+    .anchor-card { background: rgba(27,27,30,0.9); border-radius: 15px; padding: 1.5rem; border: 2px solid; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+    .anchor-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,245,255,0.3); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @media (max-width: 768px) {
       .media-container { grid-template-columns: 1fr; }
-      .nav { flex-direction: column; }
+      .nav { width: 70px; padding: 1rem 0; }
+      .nav:before { font-size: 2rem; padding: 0.5rem 0 1rem; }
+      .nav-btn { font-size: 0; padding: 12px; }
+      .nav-btn:after { content: '•'; font-size: 1.5rem; }
+      .landing-page, .detection-page, .color-dashboard, .twin-page, .challenge-page, .biosync-page, .resilience-page, .forecast-page, .mindroom-page { margin-left: 70px; }
+      .companion-avatar { left: 90px; width: 80px; height: 80px; font-size: 40px; }
+      .companion-message { left: 90px; max-width: 250px; }
       .chat-container { width: 90%; right: 5%; }
+      .emotion-wave { height: 100px; gap: 4px; }
+      .twin-avatar { width: 150px; height: 150px; font-size: 80px; }
     }
   </style>
 </head>
@@ -346,6 +823,14 @@
   <div class="nav">
     <button class="nav-btn" onclick="showLanding()">Home</button>
     <button class="nav-btn" onclick="showDetection()">Start Detection</button>
+    <button class="nav-btn" onclick="showBioSync()">Bio-Sync</button>
+    <button class="nav-btn" onclick="showChallenges()">Challenges</button>
+    <button class="nav-btn" onclick="showResilience()">Resilience</button>
+    <button class="nav-btn" onclick="showForecast()">Forecast</button>
+    <button class="nav-btn" onclick="showMindRoom()">Mind Room</button>
+    <button class="nav-btn" onclick="showAnchors()">Anchors</button>
+    <button class="nav-btn" onclick="showSyncMap()">Sync Map</button>
+    <button class="nav-btn" onclick="showMyMindHub()">MyMind Hub</button>
     <button class="nav-btn" onclick="logout()">Logout</button>
   </div>
 
@@ -358,6 +843,297 @@
       <div>• Voice Emotion Recognition</div>
       <div>• Live Analytics Dashboard</div>
       <div>• Neural Network Processing</div>
+    </div>
+  </div>
+
+  <!-- MyMind Hub -->
+  <div class="forecast-page" id="myMindHub" style="display: none;">
+    <div class="forecast-container" style="max-width: 1400px;">
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #00F5FF, #B829FF, #00FF00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">🧠 MyMind Hub</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">A space that learns you.</p>
+      
+      <!-- Emotion Summary -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 2px solid #00F5FF;">
+          <h3 style="color: #00F5FF; margin-bottom: 1rem;">📊 Emotion Summary</h3>
+          <div id="hubEmotionDist"></div>
+        </div>
+        <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 2px solid #FFD54F;">
+          <h3 style="color: #FFD54F; margin-bottom: 1rem;">🌟 Resilience Score</h3>
+          <div style="font-size: 3rem; font-weight: bold; color: #00FF00; text-align: center;" id="hubResScore">--</div>
+          <p style="color: #FFF; text-align: center; margin-top: 1rem;" id="hubResState">Loading...</p>
+        </div>
+        <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 2px solid #06D6A0;">
+          <h3 style="color: #06D6A0; margin-bottom: 1rem;">🎯 Weekly Goal</h3>
+          <p style="color: #FFF; line-height: 1.6;" id="hubGoal">Loading your personalized goal...</p>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 1px solid rgba(0,245,255,0.2); margin-bottom: 2rem;">
+        <h3 style="color: #00F5FF; margin-bottom: 1.5rem;">🧘 Mind Gym - Quick Tools</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <button onclick="showResilience()" class="main-btn" style="padding: 15px;">🌱 Resilience Tree</button>
+          <button onclick="showChallenges()" class="main-btn" style="padding: 15px;">🎮 Challenges</button>
+          <button onclick="showAnchors()" class="main-btn" style="padding: 15px;">⚓ Happy Anchors</button>
+          <button onclick="showMindRoom()" class="main-btn" style="padding: 15px;">🌿 Mind Room</button>
+          <button onclick="showForecast()" class="main-btn" style="padding: 15px;">🔮 Mood Forecast</button>
+          <button onclick="showBioSync()" class="main-btn" style="padding: 15px;">❤️ Bio-Sync</button>
+        </div>
+      </div>
+      
+      <!-- Analytics & Insights -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 1px solid rgba(0,245,255,0.2);">
+          <h3 style="color: #00F5FF; margin-bottom: 1rem;">📊 Mood Timeline</h3>
+          <canvas id="hubMoodChart" width="400" height="200"></canvas>
+        </div>
+        <div style="background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 1px solid rgba(0,245,255,0.2);">
+          <h3 style="color: #00F5FF; margin-bottom: 1rem;">💡 Insights</h3>
+          <div id="hubInsights" style="color: #FFF; line-height: 1.8;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Synchrony Map -->
+  <div class="forecast-page" id="syncMapPage" style="display: none;">
+    <div class="forecast-container">
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #EF5350, #06D6A0, #00F5D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">🌍 Social Synchrony Map</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">Feel the world's emotions.</p>
+      
+      <div style="background: rgba(27,27,30,0.9); border-radius: 20px; padding: 3rem; border: 1px solid rgba(0,245,255,0.2);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; color: #EF5350;">🔴</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #EF5350;" id="stressCount">0</div>
+            <div style="color: #FFFFFF; margin-top: 0.5rem;">Stressed</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; color: #FFD54F;">🟡</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #FFD54F;" id="neutralCount">0</div>
+            <div style="color: #FFFFFF; margin-top: 0.5rem;">Neutral</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; color: #06D6A0;">🟢</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #06D6A0;" id="calmCount">0</div>
+            <div style="color: #FFFFFF; margin-top: 0.5rem;">Calm</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; color: #00F5D4;">🔵</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #00F5D4;" id="happyCount">0</div>
+            <div style="color: #FFFFFF; margin-top: 0.5rem;">Happy</div>
+          </div>
+        </div>
+        
+        <div style="height: 400px; background: rgba(0,0,0,0.3); border-radius: 15px; position: relative; overflow: hidden;" id="emotionHeatmap">
+          <canvas id="heatmapCanvas" width="800" height="400" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+          <p>🔒 Anonymous & Aggregated - No personal data shared</p>
+          <p style="margin-top: 0.5rem;">Last updated: <span id="syncMapTime">--</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emotion Anchors -->
+  <div class="forecast-page" id="anchorsPage" style="display: none;">
+    <div class="forecast-container">
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #FFD166, #00F5D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">⚓ Emotion Anchors</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">Your positive moments, preserved forever.</p>
+      <div class="anchor-gallery" id="anchorGallery"></div>
+    </div>
+  </div>
+
+  <!-- Anchor Creation Modal -->
+  <div class="anchor-modal" id="anchorModal">
+    <div class="anchor-content" id="anchorContent">
+      <h2 style="color: #FFD166; font-size: 2rem; margin-bottom: 1rem;">✨ Capture This Moment</h2>
+      <p style="color: #FFFFFF; margin-bottom: 1rem;">You're feeling <span id="anchorEmotion"></span>!</p>
+      <img id="anchorPreview" class="anchor-image" />
+      <input type="text" id="anchorNote" class="anchor-input" placeholder="Describe this moment in one sentence..." maxlength="100" />
+      <div style="display: flex; gap: 10px; margin-top: 1rem;">
+        <button class="main-btn" onclick="saveAnchor()" style="flex: 1;">Save Anchor</button>
+        <button class="main-btn" onclick="closeAnchorModal()" style="flex: 1; background: rgba(255,255,255,0.2);">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anchor Player Modal -->
+  <div class="anchor-modal" id="anchorPlayer">
+    <div class="anchor-content" id="playerContent">
+      <h2 id="playerTitle" style="font-size: 2rem; margin-bottom: 1rem;">⚓ Your Happy Memory</h2>
+      <img id="playerImage" class="anchor-image" />
+      <p id="playerNote" style="color: #FFFFFF; font-size: 1.2rem; margin: 1.5rem 0; line-height: 1.6;"></p>
+      <p id="playerDate" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;"></p>
+      <button class="main-btn" onclick="closeAnchorPlayer()">Close</button>
+    </div>
+  </div>
+
+  <!-- Anchor Suggestion Notification -->
+  <div id="anchorSuggestion" style="position: fixed; top: 120px; right: 20px; width: 320px; background: rgba(27,27,30,0.95); border: 2px solid #FFD166; border-radius: 15px; padding: 20px; display: none; z-index: 2500; backdrop-filter: blur(10px); animation: slideIn 0.3s ease;">
+    <p style="color: #FFD166; font-size: 1.1rem; margin-bottom: 15px; font-weight: bold;">✨ Need a boost?</p>
+    <p style="color: #FFFFFF; margin-bottom: 15px;">Want to replay a happy memory?</p>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="replaySuggestedAnchor()" style="flex: 1; padding: 10px; background: linear-gradient(45deg, #FFD166, #00F5D4); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;">Yes, show me</button>
+      <button onclick="dismissAnchorSuggestion()" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white; cursor: pointer;">Later</button>
+    </div>
+  </div>
+
+  <!-- Coping Coach Notification -->
+  <div id="copingNotification" style="position: fixed; top: 120px; left: 20px; width: 350px; background: rgba(27,27,30,0.95); border: 2px solid #06D6A0; border-radius: 15px; padding: 20px; display: none; z-index: 2500; backdrop-filter: blur(10px); animation: slideIn 0.3s ease;">
+    <p style="color: #06D6A0; font-size: 1.1rem; margin-bottom: 10px; font-weight: bold;">🧘 Coping Coach</p>
+    <p id="copingPrompt" style="color: #FFFFFF; margin-bottom: 15px;"></p>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="startCopingExercise()" style="flex: 1; padding: 10px; background: linear-gradient(45deg, #06D6A0, #00F5D4); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;">Try Now</button>
+      <button onclick="dismissCoping()" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white; cursor: pointer;">Later</button>
+    </div>
+  </div>
+
+  <!-- Coping Exercise Modal -->
+  <div class="anchor-modal" id="copingModal">
+    <div class="anchor-content" style="border: 2px solid #06D6A0; max-width: 600px;">
+      <h2 id="copingTitle" style="color: #06D6A0; font-size: 2rem; margin-bottom: 1rem;"></h2>
+      <p id="copingText" style="color: #FFFFFF; font-size: 1.2rem; line-height: 1.8; margin: 2rem 0;"></p>
+      <div id="copingTimer" style="font-size: 3rem; color: #00F5FF; font-weight: bold; margin: 2rem 0;"></div>
+      <div class="breathing-circle" id="copingCircle" style="width: 200px; height: 200px; margin: 2rem auto; display: none;"></div>
+      <button class="main-btn" onclick="completeCoping()" id="copingCompleteBtn" style="display: none;">Complete</button>
+    </div>
+  </div>
+
+  <!-- Mind Room -->
+  <div class="mindroom-page" id="mindroomPage">
+    <div class="mindroom-container">
+      <h1 id="roomTitle" style="font-family: 'Orbitron'; font-size: 3rem; color: #FFFFFF; margin-bottom: 1rem;">Connecting...</h1>
+      <p id="roomSubtitle" style="color: rgba(255,255,255,0.8); font-size: 1.2rem; margin-bottom: 2rem;">Finding your healing space...</p>
+      
+      <div class="breathing-circle" id="breathingCircle"></div>
+      
+      <p id="participantCount" style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin: 2rem 0;"></p>
+      <p style="color: rgba(255,255,255,0.7); font-size: 1rem; margin-bottom: 3rem;">Breathe together. Heal together.</p>
+      
+      <button class="main-btn" onclick="leaveMindRoom()">Leave Room</button>
+    </div>
+  </div>
+
+  <!-- Emotion Forecast -->
+  <div class="forecast-page" id="forecastPage">
+    <div class="forecast-container">
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #00F5FF, #FFD54F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">🔮 Emotion Forecast</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">Predict your mood tomorrow.</p>
+      
+      <div id="forecastCards" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 2rem;"></div>
+      
+      <button class="main-btn" onclick="refreshForecast()" style="margin-top: 3rem;">Refresh Forecast</button>
+    </div>
+  </div>
+
+  <!-- Resilience Builder -->
+  <div class="resilience-page" id="resiliencePage">
+    <div class="resilience-container">
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #00FF00, #00FA9A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">🌱 Resilience Builder</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 2rem;">From awareness to action.</p>
+      
+      <div class="resilience-score-display" id="resilienceScoreDisplay">--</div>
+      <p style="color: #FFFFFF; font-size: 1.1rem; margin-bottom: 2rem;" id="resilienceState">Loading...</p>
+      
+      <div class="resilience-tree tree-sprout" id="resilienceTree">
+        <div class="tree-leaves"></div>
+        <div class="tree-trunk"></div>
+      </div>
+      
+      <div class="goal-card">
+        <h3 style="color: #FFD54F; font-size: 1.5rem; margin-bottom: 1rem;">📋 Weekly Goal</h3>
+        <p class="goal-text" id="weeklyGoal">Loading your personalized goal...</p>
+      </div>
+      
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-value" id="positiveRatio">--</div><div class="metric-label">Positive Ratio</div></div>
+        <div class="metric-card"><div class="metric-value" id="recoverySpeed">--</div><div class="metric-label">Recovery Speed</div></div>
+        <div class="metric-card"><div class="metric-value" id="volatility">--</div><div class="metric-label">Stability</div></div>
+      </div>
+      
+      <button class="main-btn" onclick="refreshResilience()" style="margin-top: 2rem;">Refresh Tree</button>
+    </div>
+  </div>
+
+  <!-- Bio-Sync -->
+  <div class="biosync-page" id="biosyncPage">
+    <div class="biosync-container">
+      <h1 style="font-family: 'Orbitron'; text-align: center; font-size: 3rem; background: linear-gradient(45deg, #00F5FF, #00FF00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">🧠❤️ Bio-Sync</h1>
+      <div class="health-score" id="healthScore">--</div>
+      <p id="wellnessMessage" style="text-align: center; font-size: 1.5rem; color: #00F5FF; margin-bottom: 2rem;"></p>
+      <div class="bio-grid">
+        <div class="bio-card"><div class="bio-icon">😊</div><div class="bio-value" id="bioEmotion">--</div><div class="bio-label">Emotion</div></div>
+        <div class="bio-card"><div class="bio-icon">❤️</div><div class="bio-value" id="bioHeartRate">--</div><div class="bio-label">Heart Rate (bpm)</div></div>
+        <div class="bio-card"><div class="bio-icon">😴</div><div class="bio-value" id="bioSleep">--</div><div class="bio-label">Sleep (hours)</div></div>
+        <div class="bio-card"><div class="bio-icon">🚶</div><div class="bio-value" id="bioSteps">--</div><div class="bio-label">Steps Today</div></div>
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="main-btn" onclick="refreshBioSync()">Refresh Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenges -->
+  <div class="challenge-page" id="challengePage">
+    <div class="coins-display" id="coinsDisplay">🪙 0 Coins</div>
+    <h1 style="font-family: 'Orbitron'; text-align: center; font-size: 3rem; background: linear-gradient(45deg, #FFD54F, #FF3CAC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">🎮 NeuroChallenges</h1>
+    <div class="challenge-card" id="challengeCard">
+      <div class="challenge-title" id="challengeName">Loading...</div>
+      <div class="challenge-desc" id="challengeDesc"></div>
+      <div class="challenge-timer" id="challengeTimer">--</div>
+      <div style="text-align: center;">
+        <button class="main-btn" id="startChallengeBtn" onclick="startChallenge()">Start Challenge</button>
+        <button class="main-btn" onclick="loadNewChallenge()">New Challenge</button>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <div class="stat-card" style="display: inline-block; margin: 0 1rem;">
+        <div class="stat-value" id="streakDisplay">0</div>
+        <div class="stat-label">Day Streak</div>
+      </div>
+      <div class="stat-card" style="display: inline-block; margin: 0 1rem;">
+        <div class="stat-value" id="completedDisplay">0</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
+  </div>
+  <div class="reward-popup" id="rewardPopup">
+    <h2 style="color: #00FF00; font-size: 2.5rem; margin-bottom: 1rem;">🎉 Challenge Complete!</h2>
+    <p id="rewardText" style="color: #FFFFFF; font-size: 1.3rem; margin-bottom: 1rem;"></p>
+    <p id="feedbackText" style="color: #00F5FF; font-size: 1.1rem; margin-bottom: 2rem;"></p>
+    <button class="main-btn" onclick="closeReward()">Awesome!</button>
+  </div>
+
+  <!-- Emotion Twin -->
+  <div class="twin-page" id="twinPage">
+    <div class="twin-container">
+      <h1 style="font-family: 'Orbitron'; text-align: center; font-size: 3rem; background: linear-gradient(45deg, #00F5FF, #B829FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">🪞 Your Emotion Twin</h1>
+      <div class="twin-avatar" id="twinAvatar">😊</div>
+      <div class="twin-message" id="twinMessage"><p id="twinText">Loading your emotional reflection...</p></div>
+      <div class="twin-stats" id="twinStats"></div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="main-btn" onclick="refreshTwin()">Refresh Twin</button>
+        <button class="main-btn" onclick="showWeeklyReflection()">Weekly Reflection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Color Dashboard -->
+  <div class="color-dashboard" id="colorDashboard">
+    <div class="color-title">🌈 Emotion Color Dashboard</div>
+    <div class="color-wave-container">
+      <div class="emotion-wave" id="emotionWave"></div>
+      <div class="emotion-legend">
+        <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, #4FC3F7, #29B6F6);"></div> 💙 Calm</div>
+        <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, #FFD54F, #FFC107);"></div> 🧡 Happy</div>
+        <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, #BA68C8, #9C27B0);"></div> 💜 Stressed</div>
+        <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, #EF5350, #E53935);"></div> ❤️ Angry</div>
+        <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, #90A4AE, #607D8B);"></div> 🌫️ Sad</div>
+      </div>
     </div>
   </div>
 
@@ -396,6 +1172,76 @@
     </div>
   </div>
 
+  <!-- Productivity Alert -->
+  <div class="productivity-alert" id="productivityAlert">
+    <div class="alert-header" id="alertHeader">ALERT</div>
+    <div class="alert-message" id="alertMessage"></div>
+    <div class="alert-suggestions" id="alertSuggestions"></div>
+    <button class="alert-close" onclick="closeProductivityAlert()">Got it!</button>
+  </div>
+
+  <!-- Mood Forecast Modal -->
+  <div class="forecast-modal" id="forecastModal">
+    <div class="forecast-content" id="forecastContent"></div>
+  </div>
+
+  <!-- Privacy Indicator -->
+  <div style="position: fixed; top: 110px; right: 20px; background: rgba(27,27,30,0.95); border: 2px solid #00FF00; border-radius: 15px; padding: 10px 15px; z-index: 2000; font-size: 0.9rem; color: #00FF00; cursor: pointer;" onclick="showPrivacyInfo()" title="Click for privacy details">
+    🔒 Encrypted Locally
+  </div>
+
+  <!-- Privacy Modal -->
+  <div id="privacyModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 3000;">
+    <div style="background: rgba(27,27,30,0.95); border: 2px solid #00F5FF; border-radius: 20px; padding: 3rem; max-width: 600px; width: 90%;">
+      <h2 style="color: #00F5FF; font-size: 2rem; margin-bottom: 1rem; font-family: 'Orbitron';">🔐 Emotion Privacy DNA</h2>
+      <p style="color: #FFFFFF; margin-bottom: 1rem; line-height: 1.6;">Your emotions. Your data. Your control.</p>
+      <div id="privacyStats" style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 10px; margin: 1rem 0;"></div>
+      <div style="display: flex; gap: 10px; margin-top: 2rem;">
+        <button class="main-btn" onclick="exportEmotionDNA()" style="flex: 1;">Export DNA</button>
+        <button class="main-btn" onclick="closePrivacyModal()" style="flex: 1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emotion Indicator -->
+  <div class="emotion-indicator" id="emotionIndicator">😊</div>
+
+  <!-- Empathy Win Popup -->
+  <div class="empathy-win" id="empathyWin">
+    <h2>🎉 Empathy Win!</h2>
+    <p style="color: #FFFFFF; font-size: 1.3rem;">Nice composure! You're building emotional intelligence.</p>
+    <button class="main-btn" onclick="closeEmpathyWin()" style="margin-top: 1rem;">Awesome!</button>
+  </div>
+
+  <!-- Empathy Card -->
+  <div id="empathyCard" style="position: fixed; bottom: 100px; right: 20px; width: 320px; background: rgba(27,27,30,0.95); border: 2px solid #00F5FF; border-radius: 15px; padding: 20px; display: none; z-index: 1500; backdrop-filter: blur(10px); animation: slideUp 0.3s ease;">
+    <p id="empathyText" style="color: #FFFFFF; font-size: 1.1rem; margin-bottom: 15px; line-height: 1.5;"></p>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="acceptEmpathy()" style="flex: 1; padding: 10px; background: linear-gradient(45deg, #00FF00, #00CC00); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;">Yes, do it</button>
+      <button onclick="dismissEmpathy()" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white; cursor: pointer;">Skip</button>
+    </div>
+  </div>
+
+  <!-- Breathe Overlay -->
+  <div class="breathe-overlay" id="breatheOverlay"></div>
+
+  <!-- AI Companion Avatar -->
+  <div class="companion-avatar" id="companionAvatar" onclick="toggleCompanion()">😊</div>
+  <audio id="bgMusic" loop style="display: none;"></audio>
+  <audio id="moodSound" loop style="display: none;"></audio>
+  
+  <!-- Sound Control -->
+  <div style="position: fixed; bottom: 160px; left: 240px; z-index: 999;">
+    <button onclick="toggleMoodSound()" style="width: 50px; height: 50px; border-radius: 50%; background: rgba(27,27,30,0.95); border: 2px solid #00F5FF; color: #00F5FF; font-size: 24px; cursor: pointer; transition: all 0.3s ease;" id="soundToggle" title="Toggle mood sound">🔊</button>
+  </div>
+  <div class="companion-message" id="companionMessage">
+    <div class="companion-text" id="companionText"></div>
+    <div class="companion-actions">
+      <button class="companion-btn" onclick="acceptCompanionSuggestion()">Yes</button>
+      <button class="companion-btn" onclick="dismissCompanion()">Later</button>
+    </div>
+  </div>
+
   <!-- Chatbot -->
   <button class="chat-toggle" onclick="toggleChat()">💬</button>
   <div class="chat-container" id="chatContainer">
@@ -422,11 +1268,214 @@
     function showLanding() {
       document.getElementById("landingPage").style.display = "flex";
       document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      document.getElementById("anchorsPage").style.display = "none";
     }
 
     function showDetection() {
       document.getElementById("landingPage").style.display = "none";
       document.getElementById("detectionPage").style.display = "block";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+    }
+
+    function showColorDashboard() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "block";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadWeeklyEmotions();
+    }
+
+    function showEmotionTwin() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "block";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadEmotionTwin();
+    }
+
+    function showChallenges() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "block";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadChallengeStats();
+      loadNewChallenge();
+    }
+
+    function showBioSync() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "block";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadBioSync();
+    }
+
+    function showResilience() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "block";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadResilience();
+    }
+
+    function showForecast() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "block";
+      document.getElementById("mindroomPage").style.display = "none";
+      loadForecast();
+    }
+
+    function showMindRoom() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "block";
+      document.getElementById("anchorsPage").style.display = "none";
+      joinMindRoom();
+    }
+
+    function showAnchors() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      document.getElementById("anchorsPage").style.display = "block";
+      document.getElementById("syncMapPage").style.display = "none";
+      loadAnchors();
+    }
+
+    function showSyncMap() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      document.getElementById("anchorsPage").style.display = "none";
+      document.getElementById("syncMapPage").style.display = "block";
+      document.getElementById("myMindHub").style.display = "none";
+      loadSyncMap();
+    }
+
+    function showMyMindHub() {
+      document.getElementById("landingPage").style.display = "none";
+      document.getElementById("detectionPage").style.display = "none";
+      document.getElementById("colorDashboard").style.display = "none";
+      document.getElementById("twinPage").style.display = "none";
+      document.getElementById("challengePage").style.display = "none";
+      document.getElementById("biosyncPage").style.display = "none";
+      document.getElementById("resiliencePage").style.display = "none";
+      document.getElementById("forecastPage").style.display = "none";
+      document.getElementById("mindroomPage").style.display = "none";
+      document.getElementById("anchorsPage").style.display = "none";
+      document.getElementById("syncMapPage").style.display = "none";
+      document.getElementById("myMindHub").style.display = "block";
+      loadMyMindHub();
+    }
+
+    async function loadWeeklyEmotions() {
+      try {
+        const response = await fetch('/get_weekly_emotions');
+        const data = await response.json();
+        if (data.success) {
+          displayEmotionWave(data.emotions);
+        }
+      } catch (error) {
+        console.error('Error loading emotions:', error);
+      }
+    }
+
+    function displayEmotionWave(emotions) {
+      const waveContainer = document.getElementById('emotionWave');
+      waveContainer.innerHTML = '';
+      
+      const emotionColors = {
+        neutral: 'linear-gradient(135deg, #4FC3F7, #29B6F6)',
+        happy: 'linear-gradient(135deg, #FFD54F, #FFC107)',
+        surprised: 'linear-gradient(135deg, #FFD54F, #FFC107)',
+        sad: 'linear-gradient(135deg, #90A4AE, #607D8B)',
+        angry: 'linear-gradient(135deg, #EF5350, #E53935)',
+        fear: 'linear-gradient(135deg, #BA68C8, #9C27B0)'
+      };
+      
+      if (emotions.length === 0) {
+        waveContainer.innerHTML = '<p style="color: #00F5FF; text-align: center; width: 100%;">No emotion data yet. Start detection to see your color wave!</p>';
+        return;
+      }
+      
+      emotions.forEach((item, index) => {
+        const emotion = item[0];
+        const timestamp = new Date(item[1]);
+        const bar = document.createElement('div');
+        bar.className = 'wave-bar';
+        bar.style.background = emotionColors[emotion] || emotionColors.neutral;
+        bar.style.height = `${Math.random() * 60 + 40}%`;
+        bar.title = `${emotion} - ${timestamp.toLocaleString()}`;
+        
+        const label = document.createElement('div');
+        label.className = 'wave-label';
+        label.textContent = timestamp.toLocaleDateString('en-US', { weekday: 'short' });
+        bar.appendChild(label);
+        
+        waveContainer.appendChild(bar);
+      });
     }
 
     // Detection functions
@@ -635,12 +1684,57 @@
           emotion: selectedEmotion
         });
         
-        // Log emotion to database
+        // Log emotion to database and get productivity coaching
         fetch('/log_emotion', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ emotion: selectedEmotion, confidence: 0.85 })
-        });
+        }).then(response => response.json())
+          .then(data => {
+            if (data.coaching && data.coaching.alert) {
+              showProductivityAlert(data.coaching);
+            }
+          });
+        
+        // Store latest emotion globally for chatbot
+        window.latestEmotion = selectedEmotion;
+        updateCompanionAvatar(selectedEmotion);
+        updateEmotionUI(selectedEmotion);
+        if (moodSoundEnabled) playMoodTone(selectedEmotion);
+        checkAnchorCreation(selectedEmotion, 0.85);
+        checkAnchorSuggestion(selectedEmotion);
+        checkCopingCoach(selectedEmotion);
+        checkEmpathy();
+      }
+    }
+
+    // Emotion-Reactive Design
+    const emotionThemes = {
+      happy: { class: 'emotion-happy', emoji: '😊' },
+      sad: { class: 'emotion-sad', emoji: '😔' },
+      angry: { class: 'emotion-angry', emoji: '😠' },
+      fear: { class: 'emotion-fear', emoji: '😰', breathe: true },
+      surprised: { class: 'emotion-surprised', emoji: '😲' },
+      neutral: { class: 'emotion-neutral', emoji: '😐' }
+    };
+
+    function updateEmotionUI(emotion) {
+      const theme = emotionThemes[emotion];
+      if (!theme) return;
+      
+      // Update emotion indicator
+      document.getElementById('emotionIndicator').textContent = theme.emoji;
+      
+      // Remove all emotion classes
+      document.body.className = document.body.className.replace(/emotion-\w+/g, '').trim();
+      
+      // Add new emotion class
+      document.body.classList.add(theme.class);
+      
+      // Show breathe overlay for fear/anxiety
+      const breatheOverlay = document.getElementById('breatheOverlay');
+      if (theme.breathe && document.getElementById('breatheOverlay').style.display !== 'block') {
+        // Don't auto-show, wait for empathy prompt
       }
     }
 
@@ -659,10 +1753,14 @@
       input.value = '';
 
       try {
+        // Send message with latest detected emotion
         const response = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
+          body: JSON.stringify({ 
+            message: message,
+            emotion: window.latestEmotion || null
+          })
         });
         const data = await response.json();
         addMessage(data.response, 'bot');
@@ -690,8 +1788,1043 @@
       window.location.href = '/logout';
     }
 
+    // Productivity Coach Functions
+    function showProductivityAlert(coaching) {
+      const alertBox = document.getElementById('productivityAlert');
+      if (!alertBox) return;
+      
+      const header = coaching.urgency === 'high' ? '⚠️ URGENT' : 
+                     coaching.urgency === 'medium' ? '💡 REMINDER' : 'ℹ️ TIP';
+      
+      document.getElementById('alertHeader').textContent = header;
+      document.getElementById('alertMessage').textContent = coaching.message;
+      
+      const suggestionsDiv = document.getElementById('alertSuggestions');
+      suggestionsDiv.innerHTML = '';
+      
+      coaching.suggestions.forEach(suggestion => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = suggestion;
+        suggestionsDiv.appendChild(div);
+      });
+      
+      alertBox.style.display = 'block';
+      
+      // Auto-hide after 15 seconds for low urgency
+      if (coaching.urgency === 'low') {
+        setTimeout(() => {
+          alertBox.style.display = 'none';
+        }, 15000);
+      }
+    }
+
+    function closeProductivityAlert() {
+      document.getElementById('productivityAlert').style.display = 'none';
+    }
+
+    function getBreakSuggestion() {
+      fetch('/get_break_suggestion')
+        .then(response => response.json())
+        .then(data => {
+          const coaching = {
+            alert: true,
+            urgency: 'low',
+            message: 'Here are some suggestions to boost your productivity:',
+            suggestions: [data.micro_break, data.breathing, data.music]
+          };
+          showProductivityAlert(coaching);
+        });
+    }
+
+    // Mood Forecast Functions
+    function showMoodForecast() {
+      fetch('/get_mood_forecast')
+        .then(response => response.json())
+        .then(data => {
+          if (!data.success) {
+            alert('Please log in to view mood forecast');
+            return;
+          }
+          displayMoodForecast(data);
+        })
+        .catch(error => {
+          console.error('Error fetching mood forecast:', error);
+        });
+    }
+
+    function displayMoodForecast(data) {
+      const modal = document.getElementById('forecastModal');
+      const content = document.getElementById('forecastContent');
+      
+      let html = '<div class="forecast-title">🔮 Mood Forecast</div>';
+      
+      // Daily Forecast
+      if (data.daily_forecast) {
+        html += '<div class="forecast-section">';
+        html += '<h3>🌞 Today\'s Forecast</h3>';
+        html += `<p style="color: #FFFFFF;">Day: ${data.daily_forecast.day} ${data.daily_forecast.time}</p>`;
+        html += `<p style="color: #00F5FF;">${data.daily_forecast.advice}</p>`;
+        html += '</div>';
+      }
+      
+      // Insights
+      if (data.insights) {
+        // Risk Level
+        html += '<div class="forecast-section">';
+        html += `<span class="risk-badge risk-${data.insights.risk_level}">Risk Level: ${data.insights.risk_level.toUpperCase()}</span>`;
+        html += '</div>';
+        
+        // Warnings
+        if (data.insights.warnings && data.insights.warnings.length > 0) {
+          html += '<div class="forecast-section">';
+          html += '<h3>⚠️ Warnings</h3>';
+          data.insights.warnings.forEach(warning => {
+            html += `<div class="warning-item">${warning}</div>`;
+          });
+          html += '</div>';
+        }
+        
+        // Patterns
+        if (data.insights.patterns && data.insights.patterns.length > 0) {
+          html += '<div class="forecast-section">';
+          html += '<h3>📊 Detected Patterns</h3>';
+          data.insights.patterns.forEach(pattern => {
+            html += `<div class="pattern-item">• ${pattern}</div>`;
+          });
+          html += '</div>';
+        }
+        
+        // Recommendations
+        if (data.insights.recommendations && data.insights.recommendations.length > 0) {
+          html += '<div class="forecast-section">';
+          html += '<h3>💡 Recommendations</h3>';
+          data.insights.recommendations.forEach(rec => {
+            html += `<div class="recommendation-item">${rec}</div>`;
+          });
+          html += '</div>';
+        }
+      }
+      
+      // Weekly Outlook
+      if (data.weekly_outlook && data.weekly_outlook.summary) {
+        html += '<div class="forecast-section">';
+        html += '<h3>📅 Weekly Outlook</h3>';
+        html += `<p style="color: #FFFFFF;">${data.weekly_outlook.summary}</p>`;
+        if (data.weekly_outlook.tips) {
+          data.weekly_outlook.tips.forEach(tip => {
+            html += `<div class="recommendation-item">${tip}</div>`;
+          });
+        }
+        html += '</div>';
+      }
+      
+      html += '<button class="alert-close" onclick="closeForecastModal()">Close</button>';
+      
+      content.innerHTML = html;
+      modal.style.display = 'flex';
+    }
+
+    function closeForecastModal() {
+      document.getElementById('forecastModal').style.display = 'none';
+    }
+
+    // AI Companion Functions
+    let companionSuggestion = null;
+    const avatarExpressions = {
+      happy: '😊',
+      sad: '😔',
+      angry: '😠',
+      neutral: '😐',
+      surprised: '😲',
+      fear: '😰'
+    };
+
+    function updateCompanionAvatar(emotion) {
+      const avatar = document.getElementById('companionAvatar');
+      avatar.textContent = avatarExpressions[emotion] || '😊';
+      
+      // Trigger personalized feedback based on emotion patterns
+      checkEmotionPattern(emotion);
+    }
+
+    function checkEmotionPattern(emotion) {
+      if (!window.companionLastCheck) window.companionLastCheck = Date.now();
+      if (Date.now() - window.companionLastCheck < 60000) return; // Check every minute
+      
+      window.companionLastCheck = Date.now();
+      
+      fetch('/get_user_info')
+        .then(response => response.json())
+        .then(userInfo => {
+          if (!userInfo.logged_in) return;
+          
+          const messages = {
+            sad: `Hey ${userInfo.username}, you seem down today. Want a quick mood boost?`,
+            angry: `${userInfo.username}, I sense some tension. How about a 2-minute breathing exercise?`,
+            fear: `${userInfo.username}, feeling stressed? Let's try a relaxation session.`,
+            neutral: `Hey ${userInfo.username}, you seem tired today — want a quick 2-minute relaxation session?`
+          };
+          
+          if (messages[emotion]) {
+            companionSuggestion = emotion;
+            showCompanionMessage(messages[emotion]);
+            speakMessage(messages[emotion]);
+          }
+        });
+    }
+
+    function showCompanionMessage(text) {
+      document.getElementById('companionText').textContent = text;
+      document.getElementById('companionMessage').style.display = 'block';
+      
+      setTimeout(() => {
+        dismissCompanion();
+      }, 15000);
+    }
+
+    function toggleCompanion() {
+      const msg = document.getElementById('companionMessage');
+      msg.style.display = msg.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function dismissCompanion() {
+      document.getElementById('companionMessage').style.display = 'none';
+    }
+
+    function acceptCompanionSuggestion() {
+      dismissCompanion();
+      if (companionSuggestion === 'sad') {
+        showMoodForecast();
+      } else {
+        getBreakSuggestion();
+      }
+    }
+
+    function speakMessage(text) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        utterance.volume = 0.8;
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+    async function loadEmotionTwin() {
+      try {
+        const [responseData, profileData] = await Promise.all([
+          fetch('/get_twin_response', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({}) }).then(r => r.json()),
+          fetch('/get_twin_profile').then(r => r.json())
+        ]);
+        
+        const avatar = document.getElementById('twinAvatar');
+        const message = document.getElementById('twinText');
+        const twinMsg = document.getElementById('twinMessage');
+        
+        avatar.textContent = avatarExpressions[profileData.recent_emotion] || '😊';
+        avatar.style.borderColor = responseData.color || '#00F5FF';
+        twinMsg.style.borderColor = responseData.color || '#00F5FF';
+        message.textContent = responseData.message || 'Keep logging emotions so I can learn about you!';
+        
+        if (profileData.emotion_distribution) {
+          const stats = document.getElementById('twinStats');
+          stats.innerHTML = `<div class="stat-card"><div class="stat-value">${profileData.total_logs}</div><div class="stat-label">Emotions Logged</div></div>`;
+          stats.innerHTML += `<div class="stat-card"><div class="stat-value">${profileData.dominant_emotion}</div><div class="stat-label">Dominant Emotion</div></div>`;
+          Object.entries(profileData.emotion_distribution).forEach(([emotion, percent]) => {
+            stats.innerHTML += `<div class="stat-card"><div class="stat-value">${percent}%</div><div class="stat-label">${emotion}</div></div>`;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading twin:', error);
+      }
+    }
+
+    function refreshTwin() { loadEmotionTwin(); }
+
+    async function showWeeklyReflection() {
+      try {
+        const response = await fetch('/get_weekly_reflection');
+        const data = await response.json();
+        alert('📊 Weekly Reflection\n\n' + data.reflection);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    // Challenge Functions
+    let currentChallenge = null;
+    let challengeTimer = null;
+    let challengeStartTime = null;
+
+    async function loadChallengeStats() {
+      try {
+        const response = await fetch('/get_user_stats');
+        const stats = await response.json();
+        document.getElementById('coinsDisplay').textContent = `🪙 ${stats.coins} Coins`;
+        document.getElementById('streakDisplay').textContent = stats.streak;
+        document.getElementById('completedDisplay').textContent = stats.completed;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    async function loadNewChallenge() {
+      try {
+        const response = await fetch('/get_challenge');
+        currentChallenge = await response.json();
+        document.getElementById('challengeName').textContent = currentChallenge.name;
+        document.getElementById('challengeDesc').textContent = currentChallenge.description;
+        document.getElementById('challengeTimer').textContent = `${currentChallenge.duration}s`;
+        document.getElementById('startChallengeBtn').disabled = false;
+      } catch (error) {
+        console.error('Error loading challenge:', error);
+      }
+    }
+
+    function startChallenge() {
+      if (!currentChallenge) return;
+      
+      document.getElementById('startChallengeBtn').disabled = true;
+      challengeStartTime = Date.now();
+      let timeLeft = currentChallenge.duration;
+      
+      document.getElementById('challengeTimer').textContent = `${timeLeft}s`;
+      
+      challengeTimer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('challengeTimer').textContent = `${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+          clearInterval(challengeTimer);
+          checkChallengeCompletion();
+        }
+      }, 1000);
+    }
+
+    async function checkChallengeCompletion() {
+      const detectedEmotion = window.latestEmotion || 'neutral';
+      const durationMet = (Date.now() - challengeStartTime) >= currentChallenge.duration * 1000;
+      
+      try {
+        const response = await fetch('/complete_challenge', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            challenge_id: currentChallenge.id,
+            detected_emotion: detectedEmotion,
+            duration_met: durationMet
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showReward(result);
+          loadChallengeStats();
+        } else {
+          alert('Challenge not completed. Try again!');
+          document.getElementById('startChallengeBtn').disabled = false;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    function showReward(result) {
+      document.getElementById('rewardText').textContent = `+${result.coins_earned} NeuroCoins! Total: ${result.total_coins}`;
+      document.getElementById('feedbackText').textContent = result.feedback;
+      document.getElementById('rewardPopup').style.display = 'block';
+    }
+
+    function closeReward() {
+      document.getElementById('rewardPopup').style.display = 'none';
+      loadNewChallenge();
+    }
+
+    // Bio-Sync Functions
+    async function loadBioSync() {
+      const emotion = window.latestEmotion || 'neutral';
+      try {
+        const response = await fetch(`/get_bio_sync?emotion=${emotion}`);
+        const data = await response.json();
+        
+        const scoreEl = document.getElementById('healthScore');
+        scoreEl.textContent = data.mind_health_score;
+        scoreEl.style.borderColor = data.wellness_color;
+        scoreEl.style.color = data.wellness_color;
+        
+        document.getElementById('wellnessMessage').textContent = `${data.wellness_icon} ${data.wellness_message}`;
+        document.getElementById('bioEmotion').textContent = data.emotion;
+        document.getElementById('bioHeartRate').textContent = data.heart_rate;
+        document.getElementById('bioSleep').textContent = data.sleep_hours;
+        document.getElementById('bioSteps').textContent = data.steps.toLocaleString();
+      } catch (error) {
+        console.error('Error loading bio-sync:', error);
+      }
+    }
+
+    function refreshBioSync() { loadBioSync(); }
+
+    // Resilience Functions
+    async function loadResilience() {
+      try {
+        const response = await fetch('/get_resilience_score');
+        const data = await response.json();
+        
+        document.getElementById('resilienceScoreDisplay').textContent = data.score;
+        document.getElementById('weeklyGoal').textContent = data.goal;
+        document.getElementById('positiveRatio').textContent = Math.round(data.positive_ratio * 100) + '%';
+        document.getElementById('recoverySpeed').textContent = Math.round(data.recovery_speed * 100) + '%';
+        document.getElementById('volatility').textContent = Math.round((1 - data.volatility) * 100) + '%';
+        
+        const tree = document.getElementById('resilienceTree');
+        tree.className = 'resilience-tree tree-' + data.tree_state;
+        
+        const stateMessages = {
+          sprout: '🌱 Early emotional awareness - Keep growing!',
+          sapling: '🌿 Building coping strategies - Great progress!',
+          young_tree: '🌳 Emotional balance improving - Almost there!',
+          flourishing: '✨ High resilience & emotional stability - Amazing!'
+        };
+        document.getElementById('resilienceState').textContent = stateMessages[data.tree_state] || 'Growing...';
+      } catch (error) {
+        console.error('Error loading resilience:', error);
+      }
+    }
+
+    function refreshResilience() { loadResilience(); }
+
+    // Emotion Forecast Functions
+    async function loadForecast() {
+      try {
+        const response = await fetch('/get_emotion_forecast');
+        const data = await response.json();
+        
+        const container = document.getElementById('forecastCards');
+        container.innerHTML = '';
+        
+        const weatherColors = {
+          '☀️': '#FFD54F',
+          '🌧️': '#118AB2',
+          '⛈️': '#9B5DE5',
+          '🌤️': '#00F5FF',
+          '🌥️': '#90A4AE'
+        };
+        
+        data.forecast.forEach(day => {
+          const card = document.createElement('div');
+          card.className = 'weather-card';
+          card.style.borderColor = weatherColors[day.weather] || '#00F5FF';
+          card.innerHTML = `
+            <div class="weather-day">${day.day}</div>
+            <div class="weather-emoji">${day.weather}</div>
+            <div class="weather-mood">${day.emoji} ${day.mood}</div>
+            <div class="weather-tip">${day.tip}</div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading forecast:', error);
+      }
+    }
+
+    function refreshForecast() { loadForecast(); }
+
+    // Mind Room Functions
+    let roomBpmInterval = null;
+    
+    async function joinMindRoom() {
+      try {
+        const response = await fetch('/join_mind_room');
+        const data = await response.json();
+        
+        document.getElementById('roomTitle').textContent = data.room + ' 🌿';
+        document.getElementById('roomSubtitle').textContent = 'Heal together, safely.';
+        document.getElementById('participantCount').textContent = `You're breathing with ${data.participants} others right now.`;
+        
+        const page = document.getElementById('mindroomPage');
+        page.style.background = `radial-gradient(circle at center, ${data.color}, rgba(0,0,0,0.8))`;
+        
+        const circle = document.getElementById('breathingCircle');
+        const bpmMs = (60000 / data.bpm);
+        circle.style.animationDuration = (bpmMs / 1000) + 's';
+        
+        createParticles(data.color);
+        
+        if (roomBpmInterval) clearInterval(roomBpmInterval);
+        roomBpmInterval = setInterval(() => {
+          playSoftPulse();
+        }, bpmMs);
+      } catch (error) {
+        console.error('Error joining room:', error);
+      }
+    }
+    
+    function createParticles(color) {
+      const page = document.getElementById('mindroomPage');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.background = color;
+        particle.style.animationDelay = Math.random() * 8 + 's';
+        page.appendChild(particle);
+      }
+    }
+    
+    function playSoftPulse() {
+      const circle = document.getElementById('breathingCircle');
+      circle.style.boxShadow = '0 0 100px rgba(255,255,255,0.8)';
+      setTimeout(() => {
+        circle.style.boxShadow = '0 0 60px rgba(255,255,255,0.4)';
+      }, 200);
+    }
+    
+    function leaveMindRoom() {
+      if (roomBpmInterval) clearInterval(roomBpmInterval);
+      const particles = document.querySelectorAll('.particle');
+      particles.forEach(p => p.remove());
+      showLanding();
+    }
+
+    // Emotion Anchors
+    let pendingAnchor = null;
+    let lastAnchorCheck = 0;
+    let suggestedAnchorId = null;
+    
+    function checkAnchorCreation(emotion, confidence) {
+      const positiveEmotions = ['happy', 'joyful', 'calm', 'euphoric', 'surprised'];
+      const now = Date.now();
+      if (positiveEmotions.includes(emotion) && confidence > 0.8 && now - lastAnchorCheck > 300000) {
+        lastAnchorCheck = now;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        pendingAnchor = { emotion, confidence, imageData };
+        document.getElementById('anchorEmotion').textContent = emotion;
+        document.getElementById('anchorPreview').src = imageData;
+        document.getElementById('anchorModal').style.display = 'flex';
+        const colors = { happy: '#FFD166', joyful: '#00F5D4', calm: '#06D6A0', euphoric: '#00F5FF', surprised: '#FFD54F' };
+        document.getElementById('anchorContent').style.borderColor = colors[emotion] || '#00F5FF';
+      }
+    }
+    
+    async function saveAnchor() {
+      if (!pendingAnchor) return;
+      const note = document.getElementById('anchorNote').value || 'A happy moment';
+      try {
+        await fetch('/create_anchor', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ ...pendingAnchor, note })
+        });
+        closeAnchorModal();
+        alert('✨ Anchor saved!');
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    function closeAnchorModal() {
+      document.getElementById('anchorModal').style.display = 'none';
+      document.getElementById('anchorNote').value = '';
+      pendingAnchor = null;
+    }
+    
+    async function loadAnchors() {
+      try {
+        const response = await fetch('/get_anchors');
+        const data = await response.json();
+        const gallery = document.getElementById('anchorGallery');
+        gallery.innerHTML = '';
+        if (data.anchors.length === 0) {
+          gallery.innerHTML = '<p style="color: #00F5FF; text-align: center; width: 100%; padding: 3rem;">No anchors yet. Capture positive moments during detection!</p>';
+          return;
+        }
+        data.anchors.forEach(anchor => {
+          const card = document.createElement('div');
+          card.className = 'anchor-card';
+          card.style.borderColor = anchor.color;
+          card.innerHTML = `<div style="font-size: 3rem;">⚓</div><div style="color: ${anchor.color}; font-size: 1.3rem; font-weight: bold;">${anchor.emotion}</div><div style="color: #FFF; font-size: 0.9rem;">${anchor.note}</div><div style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${new Date(anchor.created_at).toLocaleDateString()}</div>`;
+          card.onclick = () => playAnchor(anchor.id);
+          gallery.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    async function playAnchor(anchorId) {
+      try {
+        const response = await fetch(`/get_anchor/${anchorId}`);
+        const anchor = await response.json();
+        document.getElementById('playerTitle').textContent = `⚓ ${anchor.emotion.toUpperCase()}`;
+        document.getElementById('playerTitle').style.color = anchor.color;
+        document.getElementById('playerImage').src = anchor.image_data;
+        document.getElementById('playerNote').textContent = anchor.note;
+        document.getElementById('playerDate').textContent = new Date(anchor.created_at).toLocaleString();
+        document.getElementById('playerContent').style.borderColor = anchor.color;
+        document.getElementById('anchorPlayer').style.display = 'flex';
+        if (moodSoundEnabled) playMoodTone(anchor.emotion);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    function closeAnchorPlayer() {
+      document.getElementById('anchorPlayer').style.display = 'none';
+    }
+    
+    function checkAnchorSuggestion(emotion) {
+      const negativeEmotions = ['sad', 'angry', 'fear', 'stressed'];
+      if (negativeEmotions.includes(emotion) && Math.random() < 0.3) {
+        setTimeout(() => {
+          fetch('/suggest_anchor').then(r => r.json()).then(data => {
+            if (data && !data.none) {
+              suggestedAnchorId = data.id;
+              document.getElementById('anchorSuggestion').style.display = 'block';
+              setTimeout(() => dismissAnchorSuggestion(), 15000);
+            }
+          });
+        }, 5000);
+      }
+    }
+    
+    function replaySuggestedAnchor() {
+      if (suggestedAnchorId) {
+        playAnchor(suggestedAnchorId);
+        dismissAnchorSuggestion();
+      }
+    }
+    
+    function dismissAnchorSuggestion() {
+      document.getElementById('anchorSuggestion').style.display = 'none';
+    }
+
+    // Adaptive Coping Coach
+    let currentCopingAction = null;
+    let copingTimerInterval = null;
+    let copingStartEmotion = null;
+    
+    async function checkCopingCoach(emotion) {
+      try {
+        const response = await fetch(`/get_coping_action?emotion=${emotion}`);
+        const data = await response.json();
+        if (data.suggest && Math.random() < 0.4) {
+          currentCopingAction = data.action;
+          copingStartEmotion = emotion;
+          document.getElementById('copingPrompt').textContent = `You seem ${emotion}. Want to try a quick exercise?`;
+          document.getElementById('copingNotification').style.display = 'block';
+          setTimeout(() => dismissCoping(), 20000);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+    
+    function startCopingExercise() {
+      if (!currentCopingAction) return;
+      dismissCoping();
+      
+      document.getElementById('copingTitle').textContent = currentCopingAction.title;
+      document.getElementById('copingText').textContent = currentCopingAction.text;
+      document.getElementById('copingModal').style.display = 'flex';
+      
+      if (currentCopingAction.type === 'breathing') {
+        document.getElementById('copingCircle').style.display = 'block';
+      }
+      
+      let timeLeft = currentCopingAction.duration;
+      document.getElementById('copingTimer').textContent = timeLeft + 's';
+      
+      copingTimerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('copingTimer').textContent = timeLeft + 's';
+        if (timeLeft <= 0) {
+          clearInterval(copingTimerInterval);
+          document.getElementById('copingTimer').textContent = '✓ Done!';
+          document.getElementById('copingCompleteBtn').style.display = 'block';
+        }
+      }, 1000);
+    }
+    
+    async function completeCoping() {
+      if (copingTimerInterval) clearInterval(copingTimerInterval);
+      
+      try {
+        await fetch('/log_coping', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            emotion_before: copingStartEmotion,
+            coping_type: currentCopingAction.type,
+            coping_title: currentCopingAction.title,
+            emotion_after: window.latestEmotion || ''
+          })
+        });
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      
+      document.getElementById('copingModal').style.display = 'none';
+      document.getElementById('copingCircle').style.display = 'none';
+      document.getElementById('copingCompleteBtn').style.display = 'none';
+      alert('✨ Great job! You completed the exercise.');
+    }
+    
+    function dismissCoping() {
+      document.getElementById('copingNotification').style.display = 'none';
+    }
+
+    // Social Synchrony Map
+    async function loadSyncMap() {
+      try {
+        const response = await fetch('/admin/emotion_cloud');
+        const data = await response.json();
+        
+        const stressed = (data.distribution.angry || 0) + (data.distribution.fear || 0) + (data.distribution.stressed || 0);
+        const neutral = data.distribution.neutral || 0;
+        const calm = data.distribution.calm || 0;
+        const happy = (data.distribution.happy || 0) + (data.distribution.joyful || 0);
+        
+        document.getElementById('stressCount').textContent = Math.round(stressed) + '%';
+        document.getElementById('neutralCount').textContent = Math.round(neutral) + '%';
+        document.getElementById('calmCount').textContent = Math.round(calm) + '%';
+        document.getElementById('happyCount').textContent = Math.round(happy) + '%';
+        document.getElementById('syncMapTime').textContent = new Date().toLocaleTimeString();
+        
+        drawHeatmap(data);
+      } catch (error) {
+        console.error('Error loading sync map:', error);
+      }
+    }
+    
+    function drawHeatmap(data) {
+      const canvas = document.getElementById('heatmapCanvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      
+      ctx.clearRect(0, 0, width, height);
+      
+      const emotions = ['happy', 'calm', 'neutral', 'sad', 'angry', 'fear'];
+      const colors = {
+        happy: '#00F5D4',
+        calm: '#06D6A0',
+        neutral: '#FFD54F',
+        sad: '#118AB2',
+        angry: '#EF5350',
+        fear: '#9B5DE5'
+      };
+      
+      for (let i = 0; i < 50; i++) {
+        const emotion = emotions[Math.floor(Math.random() * emotions.length)];
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = 20 + Math.random() * 40;
+        
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+        gradient.addColorStop(0, colors[emotion] + '80');
+        gradient.addColorStop(1, colors[emotion] + '00');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x - size, y - size, size * 2, size * 2);
+      }
+    }
+    
+    setInterval(() => {
+      if (document.getElementById('syncMapPage').style.display === 'block') {
+        loadSyncMap();
+      }
+    }, 30000);
+
+    // MyMind Hub
+    async function loadMyMindHub() {
+      try {
+        const [emotions, resilience, forecast, stats] = await Promise.all([
+          fetch('/get_weekly_emotions').then(r => r.json()),
+          fetch('/get_resilience_score').then(r => r.json()),
+          fetch('/get_emotion_forecast').then(r => r.json()),
+          fetch('/get_user_stats').then(r => r.json())
+        ]);
+        
+        // Emotion Distribution
+        const emotionCounts = {};
+        emotions.emotions?.forEach(e => {
+          emotionCounts[e[0]] = (emotionCounts[e[0]] || 0) + 1;
+        });
+        const total = emotions.emotions?.length || 1;
+        const distHtml = Object.entries(emotionCounts).map(([emotion, count]) => 
+          `<div style="display: flex; justify-content: space-between; margin: 0.5rem 0;"><span>😊 ${emotion}</span><span style="color: #00F5FF;">${Math.round(count/total*100)}%</span></div>`
+        ).join('');
+        document.getElementById('hubEmotionDist').innerHTML = distHtml || '<p style="color: #FFF;">Start detection to see your patterns!</p>';
+        
+        // Resilience
+        document.getElementById('hubResScore').textContent = resilience.score || '--';
+        const stateMsg = {'sprout': '🌱 Growing', 'sapling': '🌿 Progressing', 'young_tree': '🌳 Strong', 'flourishing': '✨ Thriving'};
+        document.getElementById('hubResState').textContent = stateMsg[resilience.tree_state] || 'Keep going!';
+        
+        // Goal
+        document.getElementById('hubGoal').textContent = resilience.goal || 'Complete challenges to unlock goals!';
+        
+        // Mood Chart
+        drawMoodTimeline(emotions.emotions || []);
+        
+        // Insights
+        const insights = [
+          `✅ You've completed ${stats.completed || 0} challenges`,
+          `🔥 Current streak: ${stats.streak || 0} days`,
+          `🪙 Total NeuroCoins: ${stats.coins || 0}`,
+          forecast.forecast?.[1] ? `🔮 Tomorrow: ${forecast.forecast[1].mood} - ${forecast.forecast[1].tip}` : ''
+        ].filter(Boolean).join('<br>');
+        document.getElementById('hubInsights').innerHTML = insights;
+      } catch (error) {
+        console.error('Error loading hub:', error);
+      }
+    }
+    
+    function drawMoodTimeline(emotions) {
+      const canvas = document.getElementById('hubMoodChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      if (emotions.length === 0) {
+        ctx.fillStyle = '#00F5FF';
+        ctx.font = '16px Arial';
+        ctx.fillText('Start detection to see your mood timeline', 50, 100);
+        return;
+      }
+      
+      const emotionMap = {happy: 5, calm: 4, neutral: 3, sad: 2, angry: 1, fear: 1};
+      const data = emotions.slice(-7).map(e => emotionMap[e[0]] || 3);
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#00F5FF';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      const step = canvas.width / (data.length - 1 || 1);
+      data.forEach((val, i) => {
+        const x = i * step;
+        const y = canvas.height - (val / 5 * canvas.height * 0.8) - 20;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    // Privacy Functions
+    async function showPrivacyInfo() {
+      try {
+        const response = await fetch('/get_privacy_stats');
+        const stats = await response.json();
+        
+        const statsDiv = document.getElementById('privacyStats');
+        statsDiv.innerHTML = `
+          <div style="margin: 0.5rem 0;"><strong style="color: #00F5FF;">Encryption:</strong> <span style="color: #FFFFFF;">${stats.encryption}</span></div>
+          <div style="margin: 0.5rem 0;"><strong style="color: #00F5FF;">Storage:</strong> <span style="color: #FFFFFF;">${stats.storage}</span></div>
+          <div style="margin: 0.5rem 0;"><strong style="color: #00F5FF;">Processing:</strong> <span style="color: #FFFFFF;">${stats.processing}</span></div>
+          <div style="margin: 0.5rem 0;"><strong style="color: #00F5FF;">Data Shared:</strong> <span style="color: #00FF00;">${stats.data_shared}</span></div>
+          <div style="margin: 0.5rem 0;"><strong style="color: #00F5FF;">Reversible:</strong> <span style="color: #FF0000;">${stats.reversible ? 'Yes' : 'No'}</span></div>
+          <div style="margin: 1rem 0; padding: 1rem; background: rgba(0,255,0,0.1); border-radius: 5px; border: 1px solid #00FF00;">
+            <strong style="color: #00FF00;">✓ Status:</strong> <span style="color: #FFFFFF;">${stats.status}</span>
+          </div>
+        `;
+        
+        document.getElementById('privacyModal').style.display = 'flex';
+      } catch (error) {
+        console.error('Error loading privacy stats:', error);
+      }
+    }
+
+    function closePrivacyModal() {
+      document.getElementById('privacyModal').style.display = 'none';
+    }
+
+    async function exportEmotionDNA() {
+      try {
+        window.location.href = '/export_emotion_dna';
+        alert('✓ Emotion DNA exported successfully!\n\nYour encrypted emotion journey has been downloaded as emotion_dna.mooddna');
+      } catch (error) {
+        console.error('Error exporting DNA:', error);
+      }
+    }
+
+    // Micro-Empathy Engine
+    let currentEmpathyAction = null;
+    let lastEmpathyCheck = 0;
+
+    async function checkEmpathy() {
+      const now = Date.now();
+      if (now - lastEmpathyCheck < 60000) return; // Check every minute
+      lastEmpathyCheck = now;
+      
+      const emotion = window.latestEmotion;
+      if (!emotion || emotion === 'happy') return;
+      
+      try {
+        const response = await fetch(`/get_empathy_prompt?emotion=${emotion}`);
+        const data = await response.json();
+        
+        if (data.prompt) {
+          document.getElementById('empathyText').textContent = data.prompt;
+          document.getElementById('empathyCard').style.display = 'block';
+          currentEmpathyAction = data.action;
+          
+          setTimeout(() => {
+            dismissEmpathy();
+          }, 15000);
+        }
+      } catch (error) {
+        console.error('Error fetching empathy:', error);
+      }
+    }
+
+    function acceptEmpathy() {
+      dismissEmpathy();
+      if (currentEmpathyAction === 'breathing') {
+        startBreathingMode();
+      } else if (currentEmpathyAction === 'break') {
+        getBreakSuggestion();
+      } else if (currentEmpathyAction === 'relaxation') {
+        showMoodForecast();
+      }
+    }
+
+    function startBreathingMode() {
+      document.body.style.background = 'linear-gradient(135deg, #118AB2, #06D6A0)';
+      document.getElementById('breatheOverlay').style.display = 'block';
+      
+      setTimeout(() => {
+        document.getElementById('breatheOverlay').style.display = 'none';
+        showEmpathyWin();
+        updateEmotionUI(window.latestEmotion || 'neutral');
+      }, 30000);
+    }
+
+    function showEmpathyWin() {
+      document.getElementById('empathyWin').style.display = 'block';
+      createConfetti();
+      setTimeout(() => {
+        closeEmpathyWin();
+      }, 5000);
+    }
+
+    function closeEmpathyWin() {
+      document.getElementById('empathyWin').style.display = 'none';
+    }
+
+    function createConfetti() {
+      const colors = ['#FFD166', '#00F5FF', '#B829FF', '#00FF00', '#FF3CAC'];
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          document.body.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 50);
+      }
+    }
+
+    function dismissEmpathy() {
+      document.getElementById('empathyCard').style.display = 'none';
+    }
+
+    // Sentiment-to-Sound Engine
+    let moodSoundEnabled = false;
+    let currentMoodSound = null;
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function toggleMoodSound() {
+      moodSoundEnabled = !moodSoundEnabled;
+      const btn = document.getElementById('soundToggle');
+      const audio = document.getElementById('moodSound');
+      
+      if (moodSoundEnabled) {
+        btn.textContent = '🔊';
+        btn.style.borderColor = '#00FF00';
+        audioContext.resume();
+        if (window.latestEmotion) {
+          playMoodTone(window.latestEmotion);
+        }
+      } else {
+        btn.textContent = '🔇';
+        btn.style.borderColor = '#FF0000';
+        if (window.currentOscillator) {
+          window.currentOscillator.stop();
+          window.currentOscillator = null;
+        }
+      }
+    }
+    
+    function playMoodTone(emotion) {
+      if (!moodSoundEnabled) return;
+      
+      const toneMap = {
+        happy: {freq: 523.25, type: 'sine', vol: 0.1},
+        sad: {freq: 261.63, type: 'sine', vol: 0.08},
+        angry: {freq: 146.83, type: 'square', vol: 0.06},
+        calm: {freq: 329.63, type: 'sine', vol: 0.09},
+        neutral: {freq: 392.00, type: 'sine', vol: 0.08},
+        fear: {freq: 220.00, type: 'triangle', vol: 0.07},
+        stressed: {freq: 185.00, type: 'sawtooth', vol: 0.06}
+      };
+      
+      const tone = toneMap[emotion] || toneMap['calm'];
+      
+      if (window.currentOscillator) {
+        window.currentOscillator.stop();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = tone.type;
+      oscillator.frequency.setValueAtTime(tone.freq, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(tone.vol, audioContext.currentTime + 1);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      window.currentOscillator = oscillator;
+    }
+    
+    setInterval(() => {
+      if (moodSoundEnabled && window.latestEmotion) {
+        playMoodTone(window.latestEmotion);
+      }
+    }, 8000);
+
     // Initialize
     showLanding();
+    
+    // Check for empathy prompts every minute
+    setInterval(checkEmpathy, 60000);
+    
+    // Auto-update emotion UI every 3 seconds
+    setInterval(() => {
+      if (window.latestEmotion) {
+        updateEmotionUI(window.latestEmotion);
+      }
+    }, 3000);
+    
+    // Auto-refresh color dashboard every 30 seconds if visible
+    setInterval(() => {
+      if (document.getElementById('colorDashboard').style.display === 'block') {
+        loadWeeklyEmotions();
+      }
+    }, 30000);
   </script>
 </body>
 </html>

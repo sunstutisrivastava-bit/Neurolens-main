@@ -6,6 +6,7 @@ class NeuroLensChatbot:
         self.user_responses = {}
         self.question_index = 0
         self.asked_questions = set()
+        self.detected_emotion = None
         
         self.question_pool = [
             "How was your day today?",
@@ -90,6 +91,83 @@ class NeuroLensChatbot:
             "What's your favorite way to learn new things?"
         ]
         
+        self.emotion_responses = {
+            'sad': {
+                'empathy': [
+                    "I can sense you're feeling down. It's okay to feel sad sometimes. Would you like to talk about what's bothering you?",
+                    "I'm here for you. Sadness is a natural emotion, and it's important to acknowledge it.",
+                    "I notice you might be feeling low. Remember, this feeling is temporary and you're not alone."
+                ],
+                'coping': [
+                    "Try taking deep breaths - inhale for 4 counts, hold for 4, exhale for 4. This can help calm your mind.",
+                    "Consider reaching out to a friend or loved one. Connection can really help when we're feeling down.",
+                    "Sometimes a short walk or listening to uplifting music can shift our mood. Would you like to try that?",
+                    "Writing down your feelings in a journal can help process emotions. Have you tried that?"
+                ]
+            },
+            'angry': {
+                'empathy': [
+                    "I can tell you're feeling frustrated or angry. It's completely valid to feel this way.",
+                    "Anger is a natural response. Let's work through this together.",
+                    "I understand you're upset. Take a moment to breathe - I'm here to listen."
+                ],
+                'coping': [
+                    "Try the 5-4-3-2-1 grounding technique: Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste.",
+                    "Physical activity like a quick walk or some stretches can help release tension.",
+                    "Count to 10 slowly before responding to what's bothering you. This gives your mind time to calm.",
+                    "Try progressive muscle relaxation - tense and release each muscle group from toes to head."
+                ]
+            },
+            'anxious': {
+                'empathy': [
+                    "I sense you might be feeling anxious or worried. These feelings can be overwhelming.",
+                    "Anxiety can be tough. Remember, you've gotten through difficult moments before.",
+                    "I'm here with you. Let's take this one step at a time."
+                ],
+                'coping': [
+                    "Try box breathing: Breathe in for 4, hold for 4, out for 4, hold for 4. Repeat 4 times.",
+                    "Focus on what you can control right now. Make a list of small, manageable tasks.",
+                    "Ground yourself in the present moment. What are 3 things you can see right now?",
+                    "Remember: feelings aren't facts. Challenge anxious thoughts by asking 'Is this really true?'"
+                ]
+            },
+            'happy': {
+                'empathy': [
+                    "I love seeing you happy! Your positive energy is wonderful.",
+                    "That's fantastic! It's great to see you in such good spirits.",
+                    "Your happiness is contagious! Keep embracing these positive moments."
+                ],
+                'coping': [
+                    "Savor this moment! Take a mental snapshot to remember this feeling.",
+                    "Share your joy with someone you care about - happiness multiplies when shared!",
+                    "Consider writing down what made you happy today in a gratitude journal."
+                ]
+            },
+            'neutral': {
+                'empathy': [
+                    "You seem calm and balanced right now. That's a good place to be.",
+                    "I appreciate you taking time to check in with yourself."
+                ],
+                'coping': [
+                    "This is a great time for reflection. What's one thing you're grateful for today?",
+                    "Use this calm moment to set a positive intention for the rest of your day."
+                ]
+            },
+            'fear': {
+                'empathy': [
+                    "I can sense you're feeling scared or worried. It's brave of you to acknowledge this.",
+                    "Fear is your mind trying to protect you. Let's work through this together.",
+                    "You're safe right now. I'm here with you."
+                ],
+                'coping': [
+                    "Focus on your breath. Slow, deep breathing signals safety to your nervous system.",
+                    "Name your fear out loud or write it down. Sometimes naming it reduces its power.",
+                    "Ask yourself: What's the worst that could happen? What's the best? What's most likely?",
+                    "Reach out to someone you trust. You don't have to face this alone."
+                ]
+            }
+        }
+        
         self.responses = {
             'greeting': [
                 "Hello! I'm your NeuroLens wellness assistant. I can help analyze your emotional well-being. Would you like to start a quick wellness check?",
@@ -132,7 +210,46 @@ class NeuroLensChatbot:
         else:
             return 'neutral'
     
-    def get_response(self, user_input):
+    def set_detected_emotion(self, emotion):
+        """Set the detected emotion from facial/voice analysis"""
+        self.detected_emotion = emotion.lower() if emotion else None
+    
+    def get_emotion_aware_response(self):
+        """Generate emotion-aware response based on detected emotion"""
+        if not self.detected_emotion:
+            return None
+        
+        emotion = self.detected_emotion
+        if emotion in ['sad', 'sadness']:
+            emotion = 'sad'
+        elif emotion in ['angry', 'anger']:
+            emotion = 'angry'
+        elif emotion in ['fear', 'scared']:
+            emotion = 'fear'
+        elif emotion in ['happy', 'joy', 'joyful']:
+            emotion = 'happy'
+        elif emotion in ['anxious', 'worried', 'stress']:
+            emotion = 'anxious'
+        else:
+            emotion = 'neutral'
+        
+        if emotion in self.emotion_responses:
+            empathy = random.choice(self.emotion_responses[emotion]['empathy'])
+            coping = random.choice(self.emotion_responses[emotion]['coping'])
+            return f"{empathy} {coping}"
+        return None
+    
+    def get_response(self, user_input, detected_emotion=None):
+        # Update detected emotion if provided
+        if detected_emotion:
+            self.set_detected_emotion(detected_emotion)
+        
+        # Check if we should provide emotion-aware response
+        if self.detected_emotion and random.random() < 0.3:  # 30% chance to give emotion-aware response
+            emotion_response = self.get_emotion_aware_response()
+            if emotion_response:
+                return emotion_response
+        
         user_input_lower = user_input.lower()
         
         # Handle system questions

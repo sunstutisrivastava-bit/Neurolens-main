@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion Cloud - Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: "Rajdhani", sans-serif; background: linear-gradient(135deg, #0a0e27, #1a1a2e); color: #FFFFFF; padding: 2rem; min-height: 100vh;}
+    .header {text-align: center; margin-bottom: 3rem;}
+    .title {font-family: "Orbitron"; font-size: 3rem; background: linear-gradient(45deg, #00F5FF, #B829FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+    .grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem;}
+    .card {background: rgba(27,27,30,0.9); border-radius: 15px; padding: 2rem; border: 1px solid rgba(0,245,255,0.3);}
+    .card-title {font-size: 1.5rem; color: #00F5FF; margin-bottom: 1rem; font-weight: 600;}
+    .stat-row {display: flex; justify-content: space-between; margin: 1rem 0; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 5px;}
+    .alert-box {background: rgba(239,71,111,0.2); border: 2px solid #EF476F; border-radius: 10px; padding: 1.5rem; margin: 1rem 0;}
+    .alert-title {color: #EF476F; font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;}
+    .refresh-btn {background: linear-gradient(45deg, #1A75FF, #B829FF); border: none; padding: 12px 30px; color: white; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600; margin-top: 1rem;}
+    .refresh-btn:hover {transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,245,255,0.4);}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">☁️ Emotion Cloud</div>
+    <p style="color: #00F5FF; font-size: 1.2rem;">Admin Insights Dashboard</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">🌈 Current Emotion Distribution</div>
+      <canvas id="emotionPieChart"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Emotion Trends (Last 24h)</div>
+      <canvas id="emotionLineChart"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Community Stats</div>
+      <div class="stat-row"><span>Total Users Active:</span><span id="totalUsers">--</span></div>
+      <div class="stat-row"><span>Dominant Emotion:</span><span id="dominantEmotion">--</span></div>
+      <div class="stat-row"><span>Average Mind Health:</span><span id="avgHealth">--</span></div>
+      <div class="stat-row"><span>Peak Stress Time:</span><span id="peakStress">--</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚠️ Anomaly Detection</div>
+      <div id="anomalyContainer"></div>
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <button class="refresh-btn" onclick="refreshDashboard()">🔄 Refresh Data</button>
+  </div>
+
+  <script>
+    let pieChart, lineChart;
+
+    async function loadDashboard() {
+      try {
+        const response = await fetch('/admin/emotion_cloud');
+        const data = await response.json();
+
+        // Pie Chart
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(document.getElementById('emotionPieChart'), {
+          type: 'pie',
+          data: {
+            labels: Object.keys(data.distribution),
+            datasets: [{
+              data: Object.values(data.distribution),
+              backgroundColor: ['#FFD166', '#06D6A0', '#EF476F', '#9B5DE5', '#00BBF9', '#E0E0E0']
+            }]
+          },
+          options: {plugins: {legend: {labels: {color: '#FFFFFF'}}}}
+        });
+
+        // Line Chart
+        if (lineChart) lineChart.destroy();
+        lineChart = new Chart(document.getElementById('emotionLineChart'), {
+          type: 'line',
+          data: {
+            labels: data.hourly_labels,
+            datasets: [{
+              label: 'Happy',
+              data: data.hourly_happy,
+              borderColor: '#FFD166',
+              tension: 0.4
+            }, {
+              label: 'Sad',
+              data: data.hourly_sad,
+              borderColor: '#06D6A0',
+              tension: 0.4
+            }, {
+              label: 'Stressed',
+              data: data.hourly_stress,
+              borderColor: '#EF476F',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {legend: {labels: {color: '#FFFFFF'}}},
+            scales: {
+              y: {ticks: {color: '#FFFFFF'}, grid: {color: 'rgba(255,255,255,0.1)'}},
+              x: {ticks: {color: '#FFFFFF'}, grid: {color: 'rgba(255,255,255,0.1)'}}
+            }
+          }
+        });
+
+        // Stats
+        document.getElementById('totalUsers').textContent = data.total_users;
+        document.getElementById('dominantEmotion').textContent = data.dominant_emotion;
+        document.getElementById('avgHealth').textContent = data.avg_health + '/100';
+        document.getElementById('peakStress').textContent = data.peak_stress_time;
+
+        // Anomalies
+        const anomalyContainer = document.getElementById('anomalyContainer');
+        if (data.anomalies && data.anomalies.length > 0) {
+          anomalyContainer.innerHTML = data.anomalies.map(a => 
+            `<div class="alert-box"><div class="alert-title">⚠️ ${a.title}</div><p>${a.message}</p></div>`
+          ).join('');
+        } else {
+          anomalyContainer.innerHTML = '<p style="color: #00FF00;">✓ No anomalies detected</p>';
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    function refreshDashboard() {
+      loadDashboard();
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 30000);
+  </script>
+</body>
+</html>

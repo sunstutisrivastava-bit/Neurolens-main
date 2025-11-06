@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NeuroLens - Server Check</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #1a1a2e;
+      color: #00ff00;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .box {
+      background: #0f0f23;
+      border: 2px solid #00ff00;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .error { color: #ff0000; }
+    .success { color: #00ff00; }
+    .warning { color: #ffaa00; }
+    button {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    button:hover { background: #00cc00; }
+    #log { 
+      background: #000; 
+      padding: 10px; 
+      margin-top: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 NEUROLENS - SERVER DIAGNOSTIC</h1>
+  
+  <div class="box">
+    <h2>Step 1: Check if Server is Running</h2>
+    <button onclick="checkServer()">TEST CONNECTION</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="box">
+    <h2>Step 2: Test Login/Register</h2>
+    <button onclick="testRegister()">TEST REGISTER</button>
+    <button onclick="testLogin()">TEST LOGIN</button>
+    <div id="testResult"></div>
+  </div>
+
+  <div class="box">
+    <h2>Step 3: Go to App</h2>
+    <button onclick="window.location.href='http://localhost:5000/simple'">OPEN SIMPLE LOGIN</button>
+    <button onclick="window.location.href='http://localhost:5000'">OPEN MAIN LOGIN</button>
+  </div>
+
+  <div class="box">
+    <h2>Diagnostic Log</h2>
+    <div id="log"></div>
+  </div>
+
+  <script>
+    function log(msg, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      const color = type === 'error' ? '#ff0000' : type === 'success' ? '#00ff00' : '#ffaa00';
+      logDiv.innerHTML += `<div style="color: ${color}">[${time}] ${msg}</div>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    async function checkServer() {
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerHTML = '<p class="warning">Checking server...</p>';
+      log('Testing connection to http://localhost:5000');
+
+      try {
+        const response = await fetch('http://localhost:5000/get_user_info');
+        const data = await response.json();
+        
+        statusDiv.innerHTML = '<p class="success">✓ SERVER IS RUNNING!</p>';
+        log('Server is running and responding', 'success');
+        log('Response: ' + JSON.stringify(data), 'success');
+      } catch (error) {
+        statusDiv.innerHTML = `
+          <p class="error">✗ SERVER NOT RUNNING!</p>
+          <p class="warning">Error: ${error.message}</p>
+          <p>Please start the server:</p>
+          <ol>
+            <li>Double-click START_SERVER.bat</li>
+            <li>OR open terminal and run: python app.py</li>
+            <li>Wait for "Running on http://127.0.0.1:5000"</li>
+            <li>Then click TEST CONNECTION again</li>
+          </ol>
+        `;
+        log('Connection failed: ' + error.message, 'error');
+      }
+    }
+
+    async function testRegister() {
+      const resultDiv = document.getElementById('testResult');
+      resultDiv.innerHTML = '<p class="warning">Testing registration...</p>';
+      log('Testing /register endpoint');
+
+      try {
+        const response = await fetch('http://localhost:5000/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: 'testuser_' + Date.now(),
+            password: 'test123',
+            role: 'child',
+            parent_code: null,
+            user_type: 'student'
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = '<p class="success">✓ REGISTER WORKS!</p>';
+          log('Registration successful: ' + JSON.stringify(data), 'success');
+        } else {
+          resultDiv.innerHTML = '<p class="warning">Register returned: ' + data.message + '</p>';
+          log('Registration failed: ' + data.message, 'warning');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = '<p class="error">✗ Cannot connect to server!</p>';
+        log('Register test failed: ' + error.message, 'error');
+      }
+    }
+
+    async function testLogin() {
+      const resultDiv = document.getElementById('testResult');
+      resultDiv.innerHTML = '<p class="warning">Testing login...</p>';
+      log('Testing /login endpoint');
+
+      try {
+        const response = await fetch('http://localhost:5000/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: 'test',
+            password: 'test'
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = '<p class="success">✓ LOGIN WORKS! Redirecting...</p>';
+          log('Login successful!', 'success');
+          setTimeout(() => {
+            window.location.href = 'http://localhost:5000/child_dashboard';
+          }, 1000);
+        } else {
+          resultDiv.innerHTML = '<p class="warning">Login failed: ' + data.message + '</p><p>Try registering first with username: test, password: test</p>';
+          log('Login failed: ' + data.message, 'warning');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = '<p class="error">✗ Cannot connect to server!</p>';
+        log('Login test failed: ' + error.message, 'error');
+      }
+    }
+
+    // Auto-check on load
+    window.onload = () => {
+      log('Page loaded. Click TEST CONNECTION to check server status.');
+      setTimeout(checkServer, 500);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NeuroLens - Simple Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #16213e;
+      padding: 40px;
+      border-radius: 10px;
+      width: 400px;
+    }
+    h1 {
+      color: #00d4ff;
+      text-align: center;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #00d4ff;
+      background: #0f3460;
+      color: white;
+      font-size: 16px;
+    }
+    button {
+      background: #00d4ff;
+      color: #1a1a2e;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00a8cc;
+    }
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+    .success { background: #28a745; }
+    .error { background: #dc3545; }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: #0f3460;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab.active {
+      background: #00d4ff;
+      color: #1a1a2e;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 NEUROLENS</h1>
+    
+    <div class="tabs">
+      <div class="tab active" id="loginTab" onclick="switchTab('login')">Login</div>
+      <div class="tab" id="registerTab" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <div id="loginForm">
+      <input type="text" id="loginUser" placeholder="Username" required>
+      <input type="password" id="loginPass" placeholder="Password" required>
+      <button onclick="doLogin()">Login</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <input type="text" id="regUser" placeholder="Username" required>
+      <input type="password" id="regPass" placeholder="Password" required>
+      <select id="regRole">
+        <option value="child">Child</option>
+        <option value="parent">Parent</option>
+      </select>
+      <select id="regType">
+        <option value="student">Student</option>
+        <option value="college">College</option>
+        <option value="corporate">Corporate</option>
+      </select>
+      <button onclick="doRegister()">Register</button>
+    </div>
+
+    <div class="message" id="msg"></div>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('registerTab').classList.remove('active');
+      
+      if (tab === 'login') {
+        document.getElementById('loginTab').classList.add('active');
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+      } else {
+        document.getElementById('registerTab').classList.add('active');
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+      }
+      document.getElementById('msg').style.display = 'none';
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('loginUser').value;
+      const password = document.getElementById('loginPass').value;
+      const msg = document.getElementById('msg');
+
+      if (!username || !password) {
+        msg.className = 'message error';
+        msg.textContent = 'Please fill all fields';
+        msg.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username, password})
+        });
+
+        const data = await response.json();
+        console.log('Login response:', data);
+
+        if (data.success) {
+          msg.className = 'message success';
+          msg.textContent = 'Login successful!';
+          msg.style.display = 'block';
+          
+          setTimeout(() => {
+            window.location.href = data.role === 'parent' ? '/parent_dashboard' : '/child_dashboard';
+          }, 500);
+        } else {
+          msg.className = 'message error';
+          msg.textContent = data.message || 'Login failed';
+          msg.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        msg.className = 'message error';
+        msg.textContent = 'Server error. Is it running?';
+        msg.style.display = 'block';
+      }
+    }
+
+    async function doRegister() {
+      const username = document.getElementById('regUser').value;
+      const password = document.getElementById('regPass').value;
+      const role = document.getElementById('regRole').value;
+      const user_type = document.getElementById('regType').value;
+      const msg = document.getElementById('msg');
+
+      if (!username || !password) {
+        msg.className = 'message error';
+        msg.textContent = 'Please fill all fields';
+        msg.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username, password, role, parent_code: null, user_type})
+        });
+
+        const data = await response.json();
+        console.log('Register response:', data);
+
+        if (data.success) {
+          msg.className = 'message success';
+          msg.textContent = role === 'parent' ? `Success! Parent ID: ${data.user_id}` : 'Success! Now login.';
+          msg.style.display = 'block';
+          
+          setTimeout(() => {
+            switchTab('login');
+            document.getElementById('loginUser').value = username;
+          }, 1500);
+        } else {
+          msg.className = 'message error';
+          msg.textContent = data.message || 'Registration failed';
+          msg.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        msg.className = 'message error';
+        msg.textContent = 'Server error. Is it running?';
+        msg.style.display = 'block';
+      }
+    }
+
+    // Allow Enter key
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        if (!document.getElementById('registerForm').classList.contains('hidden')) {
+          doRegister();
+        } else {
+          doLogin();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
