@@ -747,7 +747,7 @@
     .challenge-title { font-size: 2rem; color: #FFD54F; text-align: center; margin-bottom: 1rem; }
     .challenge-desc { font-size: 1.2rem; color: #FFFFFF; text-align: center; margin-bottom: 2rem; }
     .challenge-timer { font-size: 3rem; color: #00F5FF; text-align: center; margin: 2rem 0; font-weight: bold; }
-    .coins-display { position: fixed; top: 80px; right: 20px; background: rgba(27,27,30,0.9); padding: 15px 25px; border-radius: 15px; border: 2px solid #FFD54F; font-size: 1.5rem; color: #FFD54F; }
+    .coins-display { position: fixed; top: 20px; right: 120px; background: rgba(27,27,30,0.95); padding: 15px 25px; border-radius: 15px; border: 2px solid #FFD54F; font-size: 1.5rem; color: #FFD54F; z-index: 1999; backdrop-filter: blur(10px); box-shadow: 0 4px 16px rgba(255,213,79,0.3); }
     .reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(27,27,30,0.95); padding: 3rem; border-radius: 20px; border: 3px solid #00FF00; display: none; z-index: 3000; text-align: center; animation: popIn 0.5s ease; }
     @keyframes popIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
     @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
@@ -941,8 +941,8 @@
   <!-- Emotion Anchors -->
   <div class="forecast-page" id="anchorsPage" style="display: none;">
     <div class="forecast-container">
-      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #FFD166, #00F5D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">⚓ Emotion Anchors</h1>
-      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">Your positive moments, preserved forever.</p>
+      <h1 style="font-family: 'Orbitron'; font-size: 3rem; background: linear-gradient(45deg, #FFD166, #00F5D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">📸 Mood Journal</h1>
+      <p style="color: #00F5FF; font-size: 1.2rem; margin-bottom: 3rem;">Track your emotions with photos - 10 per day</p>
       <div class="anchor-gallery" id="anchorGallery"></div>
     </div>
   </div>
@@ -950,12 +950,13 @@
   <!-- Anchor Creation Modal -->
   <div class="anchor-modal" id="anchorModal">
     <div class="anchor-content" id="anchorContent">
-      <h2 style="color: #FFD166; font-size: 2rem; margin-bottom: 1rem;">✨ Capture This Moment</h2>
-      <p style="color: #FFFFFF; margin-bottom: 1rem;">You're feeling <span id="anchorEmotion"></span>!</p>
+      <h2 style="color: #FFD166; font-size: 2rem; margin-bottom: 1rem;">📸 Capture Your Mood</h2>
+      <p style="color: #FFFFFF; margin-bottom: 0.5rem;">Emotion: <span id="anchorEmotion" style="color: #00F5FF; font-weight: bold;"></span></p>
+      <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;"><span id="anchorCount">0/10 photos today</span></p>
       <img id="anchorPreview" class="anchor-image" />
-      <input type="text" id="anchorNote" class="anchor-input" placeholder="Describe this moment in one sentence..." maxlength="100" />
+      <textarea id="anchorNote" class="anchor-input" placeholder="Write something about this moment (optional)..." maxlength="200" rows="3" style="resize: none;"></textarea>
       <div style="display: flex; gap: 10px; margin-top: 1rem;">
-        <button class="main-btn" onclick="saveAnchor()" style="flex: 1;">Save Anchor</button>
+        <button class="main-btn" onclick="saveAnchor()" style="flex: 1;">Save Photo</button>
         <button class="main-btn" onclick="closeAnchorModal()" style="flex: 1; background: rgba(255,255,255,0.2);">Skip</button>
       </div>
     </div>
@@ -1660,12 +1661,12 @@
             time: new Date().toLocaleTimeString(),
             emotion: result.dominant_emotion
           });
+          processDetectedEmotion(result.dominant_emotion, result.confidence, imageData);
         }
       } catch (error) {
         console.log('API not available, using pattern detection');
-        // Improved fallback with more realistic emotion patterns
         const emotions = ['happy', 'neutral', 'surprised', 'sad', 'angry'];
-        const weights = [0.3, 0.4, 0.1, 0.1, 0.1]; // More likely to be happy/neutral
+        const weights = [0.3, 0.4, 0.1, 0.1, 0.1];
         
         let randomValue = Math.random();
         let selectedEmotion = 'neutral';
@@ -1684,28 +1685,29 @@
           emotion: selectedEmotion
         });
         
-        // Log emotion to database and get productivity coaching
-        fetch('/log_emotion', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ emotion: selectedEmotion, confidence: 0.85 })
-        }).then(response => response.json())
-          .then(data => {
-            if (data.coaching && data.coaching.alert) {
-              showProductivityAlert(data.coaching);
-            }
-          });
-        
-        // Store latest emotion globally for chatbot
-        window.latestEmotion = selectedEmotion;
-        updateCompanionAvatar(selectedEmotion);
-        updateEmotionUI(selectedEmotion);
-        if (moodSoundEnabled) playMoodTone(selectedEmotion);
-        checkAnchorCreation(selectedEmotion, 0.85);
-        checkAnchorSuggestion(selectedEmotion);
-        checkCopingCoach(selectedEmotion);
-        checkEmpathy();
+        processDetectedEmotion(selectedEmotion, 0.85, imageData);
       }
+    }
+    
+    function processDetectedEmotion(emotion, confidence, imageData) {
+      fetch('/log_emotion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emotion: emotion, confidence: confidence })
+      }).then(response => response.json())
+        .then(data => {
+          if (data.coaching && data.coaching.alert) {
+            showProductivityAlert(data.coaching);
+          }
+        });
+      
+      window.latestEmotion = emotion;
+      updateCompanionAvatar(emotion);
+      updateEmotionUI(emotion);
+      if (moodSoundEnabled) playMoodTone(emotion);
+      checkAnchorCreation(emotion, confidence, imageData);
+      checkCopingCoach(emotion);
+      checkEmpathy();
     }
 
     // Emotion-Reactive Design
@@ -2056,6 +2058,9 @@
     let currentChallenge = null;
     let challengeTimer = null;
     let challengeStartTime = null;
+    let challengeStream = null;
+    let challengeDetectionInterval = null;
+    let challengeEmotionMatches = 0;
 
     async function loadChallengeStats() {
       try {
@@ -2074,7 +2079,7 @@
         const response = await fetch('/get_challenge');
         currentChallenge = await response.json();
         document.getElementById('challengeName').textContent = currentChallenge.name;
-        document.getElementById('challengeDesc').textContent = currentChallenge.description;
+        document.getElementById('challengeDesc').textContent = currentChallenge.description + ` (Target: ${currentChallenge.target_emotion})`;
         document.getElementById('challengeTimer').textContent = `${currentChallenge.duration}s`;
         document.getElementById('startChallengeBtn').disabled = false;
       } catch (error) {
@@ -2082,29 +2087,88 @@
       }
     }
 
-    function startChallenge() {
+    async function startChallenge() {
       if (!currentChallenge) return;
       
-      document.getElementById('startChallengeBtn').disabled = true;
-      challengeStartTime = Date.now();
-      let timeLeft = currentChallenge.duration;
-      
-      document.getElementById('challengeTimer').textContent = `${timeLeft}s`;
-      
-      challengeTimer = setInterval(() => {
-        timeLeft--;
+      try {
+        challengeStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const challengeVideo = document.createElement('video');
+        challengeVideo.srcObject = challengeStream;
+        challengeVideo.autoplay = true;
+        challengeVideo.style.display = 'none';
+        document.body.appendChild(challengeVideo);
+        window.challengeVideo = challengeVideo;
+        
+        document.getElementById('startChallengeBtn').disabled = true;
+        challengeStartTime = Date.now();
+        challengeEmotionMatches = 0;
+        let timeLeft = currentChallenge.duration;
+        
         document.getElementById('challengeTimer').textContent = `${timeLeft}s`;
         
-        if (timeLeft <= 0) {
-          clearInterval(challengeTimer);
-          checkChallengeCompletion();
+        challengeDetectionInterval = setInterval(() => {
+          detectChallengeEmotion();
+        }, 500);
+        
+        challengeTimer = setInterval(() => {
+          timeLeft--;
+          document.getElementById('challengeTimer').textContent = `${timeLeft}s`;
+          
+          if (timeLeft <= 0) {
+            clearInterval(challengeTimer);
+            clearInterval(challengeDetectionInterval);
+            checkChallengeCompletion();
+          }
+        }, 1000);
+      } catch (error) {
+        alert('Camera access required for challenge!');
+        document.getElementById('startChallengeBtn').disabled = false;
+      }
+    }
+
+    async function detectChallengeEmotion() {
+      if (!window.challengeVideo || window.challengeVideo.videoWidth === 0) return;
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.challengeVideo.videoWidth;
+      canvas.height = window.challengeVideo.videoHeight;
+      ctx.drawImage(window.challengeVideo, 0, 0);
+      
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      
+      try {
+        const response = await fetch('http://localhost:5000/detect_emotion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: imageData })
+        });
+        
+        const result = await response.json();
+        if (result.success && result.dominant_emotion === currentChallenge.target_emotion) {
+          challengeEmotionMatches++;
         }
-      }, 1000);
+      } catch (error) {
+        const mockEmotion = window.latestEmotion || 'neutral';
+        if (mockEmotion === currentChallenge.target_emotion) {
+          challengeEmotionMatches++;
+        }
+      }
     }
 
     async function checkChallengeCompletion() {
-      const detectedEmotion = window.latestEmotion || 'neutral';
+      if (challengeStream) {
+        challengeStream.getTracks().forEach(track => track.stop());
+      }
+      if (window.challengeVideo) {
+        window.challengeVideo.remove();
+      }
+      
       const durationMet = (Date.now() - challengeStartTime) >= currentChallenge.duration * 1000;
+      const requiredMatches = Math.floor(currentChallenge.duration * 1.5);
+      const emotionMatched = challengeEmotionMatches >= requiredMatches;
+      
+      const accuracyPercent = Math.min(100, Math.round((challengeEmotionMatches / (currentChallenge.duration * 2)) * 100));
       
       try {
         const response = await fetch('/complete_challenge', {
@@ -2112,28 +2176,32 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             challenge_id: currentChallenge.id,
-            detected_emotion: detectedEmotion,
-            duration_met: durationMet
+            detected_emotion: currentChallenge.target_emotion,
+            duration_met: durationMet && emotionMatched,
+            accuracy: accuracyPercent
           })
         });
         
         const result = await response.json();
         
         if (result.success) {
-          showReward(result);
+          showReward(result, accuracyPercent);
           loadChallengeStats();
         } else {
-          alert('Challenge not completed. Try again!');
+          alert(`Challenge failed! Accuracy: ${accuracyPercent}%. Try again!`);
           document.getElementById('startChallengeBtn').disabled = false;
         }
       } catch (error) {
         console.error('Error:', error);
+        document.getElementById('startChallengeBtn').disabled = false;
       }
     }
 
-    function showReward(result) {
-      document.getElementById('rewardText').textContent = `+${result.coins_earned} NeuroCoins! Total: ${result.total_coins}`;
-      document.getElementById('feedbackText').textContent = result.feedback;
+    function showReward(result, accuracy) {
+      const bonusCoins = accuracy >= 90 ? 5 : accuracy >= 75 ? 3 : 0;
+      const totalEarned = result.coins_earned + bonusCoins;
+      document.getElementById('rewardText').textContent = `+${totalEarned} NeuroCoins! (Accuracy: ${accuracy}%) Total: ${result.total_coins + bonusCoins}`;
+      document.getElementById('feedbackText').textContent = result.feedback + (bonusCoins > 0 ? ` 🎉 +${bonusCoins} bonus coins!` : '');
       document.getElementById('rewardPopup').style.display = 'block';
     }
 
@@ -2293,38 +2361,49 @@
     let pendingAnchor = null;
     let lastAnchorCheck = 0;
     let suggestedAnchorId = null;
+    let dailyAnchorCount = 0;
     
-    function checkAnchorCreation(emotion, confidence) {
-      const positiveEmotions = ['happy', 'joyful', 'calm', 'euphoric', 'surprised'];
+    async function checkAnchorCreation(emotion, confidence, imageData) {
       const now = Date.now();
-      if (positiveEmotions.includes(emotion) && confidence > 0.8 && now - lastAnchorCheck > 300000) {
+      if (now - lastAnchorCheck < 120000) return;
+      
+      try {
+        const response = await fetch('/get_daily_anchor_count');
+        const data = await response.json();
+        dailyAnchorCount = data.count;
+        
+        if (dailyAnchorCount >= 10) return;
+        
         lastAnchorCheck = now;
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
         pendingAnchor = { emotion, confidence, imageData };
         document.getElementById('anchorEmotion').textContent = emotion;
         document.getElementById('anchorPreview').src = imageData;
         document.getElementById('anchorModal').style.display = 'flex';
-        const colors = { happy: '#FFD166', joyful: '#00F5D4', calm: '#06D6A0', euphoric: '#00F5FF', surprised: '#FFD54F' };
+        document.getElementById('anchorCount').textContent = `${dailyAnchorCount}/10 photos today`;
+        const colors = { happy: '#FFD166', sad: '#118AB2', angry: '#EF5350', neutral: '#90A4AE', surprised: '#FFD54F', fear: '#9B5DE5', calm: '#06D6A0' };
         document.getElementById('anchorContent').style.borderColor = colors[emotion] || '#00F5FF';
+      } catch (error) {
+        console.error('Error:', error);
       }
     }
     
     async function saveAnchor() {
       if (!pendingAnchor) return;
-      const note = document.getElementById('anchorNote').value || 'A happy moment';
+      const note = document.getElementById('anchorNote').value || '';
       try {
-        await fetch('/create_anchor', {
+        const response = await fetch('/create_anchor', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ ...pendingAnchor, note })
         });
-        closeAnchorModal();
-        alert('✨ Anchor saved!');
+        const result = await response.json();
+        if (result.success) {
+          closeAnchorModal();
+          alert(`✨ Photo saved! (${dailyAnchorCount + 1}/10 today)`);
+          dailyAnchorCount++;
+        } else {
+          alert(result.error || 'Failed to save photo');
+        }
       } catch (error) {
         console.error('Error:', error);
       }
@@ -2338,19 +2417,27 @@
     
     async function loadAnchors() {
       try {
-        const response = await fetch('/get_anchors');
-        const data = await response.json();
+        const [anchorsRes, countRes] = await Promise.all([
+          fetch('/get_anchors'),
+          fetch('/get_daily_anchor_count')
+        ]);
+        const data = await anchorsRes.json();
+        const countData = await countRes.json();
+        
         const gallery = document.getElementById('anchorGallery');
-        gallery.innerHTML = '';
+        gallery.innerHTML = `<div style="width: 100%; text-align: center; padding: 1rem; background: rgba(0,245,255,0.1); border-radius: 15px; margin-bottom: 2rem;"><h3 style="color: #00F5FF; margin-bottom: 0.5rem;">📸 Daily Mood Journal</h3><p style="color: #FFF;">Today: ${countData.count}/10 photos | ${countData.remaining} remaining</p></div>`;
+        
         if (data.anchors.length === 0) {
-          gallery.innerHTML = '<p style="color: #00F5FF; text-align: center; width: 100%; padding: 3rem;">No anchors yet. Capture positive moments during detection!</p>';
+          gallery.innerHTML += '<p style="color: #00F5FF; text-align: center; width: 100%; padding: 3rem;">No photos yet. Start emotion detection to capture your mood!</p>';
           return;
         }
+        
         data.anchors.forEach(anchor => {
           const card = document.createElement('div');
           card.className = 'anchor-card';
           card.style.borderColor = anchor.color;
-          card.innerHTML = `<div style="font-size: 3rem;">⚓</div><div style="color: ${anchor.color}; font-size: 1.3rem; font-weight: bold;">${anchor.emotion}</div><div style="color: #FFF; font-size: 0.9rem;">${anchor.note}</div><div style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">${new Date(anchor.created_at).toLocaleDateString()}</div>`;
+          const emoji = {happy: '😊', sad: '😢', angry: '😠', neutral: '😐', surprised: '😲', fear: '😰', calm: '😌'}[anchor.emotion] || '😊';
+          card.innerHTML = `<div style="font-size: 3rem;">${emoji}</div><div style="color: ${anchor.color}; font-size: 1.3rem; font-weight: bold;">${anchor.emotion}</div><div style="color: #FFF; font-size: 0.9rem; margin-top: 0.5rem;">${anchor.note || 'No note'}</div><div style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-top: 0.5rem;">${new Date(anchor.created_at).toLocaleString()}</div>`;
           card.onclick = () => playAnchor(anchor.id);
           gallery.appendChild(card);
         });
@@ -2363,13 +2450,15 @@
       try {
         const response = await fetch(`/get_anchor/${anchorId}`);
         const anchor = await response.json();
-        document.getElementById('playerTitle').textContent = `⚓ ${anchor.emotion.toUpperCase()}`;
+        const emoji = {happy: '😊', sad: '😢', angry: '😠', neutral: '😐', surprised: '😲', fear: '😰', calm: '😌'}[anchor.emotion] || '😊';
+        document.getElementById('playerTitle').textContent = `${emoji} ${anchor.emotion.toUpperCase()}`;
         document.getElementById('playerTitle').style.color = anchor.color;
         document.getElementById('playerImage').src = anchor.image_data;
-        document.getElementById('playerNote').textContent = anchor.note;
+        document.getElementById('playerNote').textContent = anchor.note || 'No note added';
         document.getElementById('playerDate').textContent = new Date(anchor.created_at).toLocaleString();
         document.getElementById('playerContent').style.borderColor = anchor.color;
         document.getElementById('anchorPlayer').style.display = 'flex';
+        window.currentAnchorId = anchorId;
         if (moodSoundEnabled) playMoodTone(anchor.emotion);
       } catch (error) {
         console.error('Error:', error);
@@ -2381,18 +2470,7 @@
     }
     
     function checkAnchorSuggestion(emotion) {
-      const negativeEmotions = ['sad', 'angry', 'fear', 'stressed'];
-      if (negativeEmotions.includes(emotion) && Math.random() < 0.3) {
-        setTimeout(() => {
-          fetch('/suggest_anchor').then(r => r.json()).then(data => {
-            if (data && !data.none) {
-              suggestedAnchorId = data.id;
-              document.getElementById('anchorSuggestion').style.display = 'block';
-              setTimeout(() => dismissAnchorSuggestion(), 15000);
-            }
-          });
-        }, 5000);
-      }
+      // Removed auto-suggestion feature
     }
     
     function replaySuggestedAnchor() {

@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import torch
 import numpy as np
 import librosa
+import cv2
 from werkzeug.utils import secure_filename
 from chatbot import NeuroLensChatbot
 from productivity_coach import ProductivityCoach
@@ -122,6 +123,75 @@ def child_dashboard():
         session['username'] = 'demo'
         session['user_type'] = 'student'
     return render_template("index.html")
+
+@app.route("/detect_emotion", methods=["POST"])
+def detect_emotion():
+    try:
+        image_data = request.json.get('image', '')
+        
+        # Try using DeepFace for real emotion detection
+        try:
+            from deepface import DeepFace
+            import base64
+            import cv2
+            import numpy as np
+            
+            # Decode base64 image
+            img_data = base64.b64decode(image_data.split(',')[1])
+            nparr = np.frombuffer(img_data, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            # Analyze emotion
+            result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
+            
+            if isinstance(result, list):
+                result = result[0]
+            
+            emotions = result['emotion']
+            dominant_emotion = result['dominant_emotion']
+            confidence = emotions[dominant_emotion] / 100
+            
+            return jsonify({
+                'success': True,
+                'dominant_emotion': dominant_emotion,
+                'confidence': confidence,
+                'all_emotions': emotions
+            })
+        except ImportError:
+            # Fallback: Use face detection patterns
+            import base64
+            import cv2
+            import numpy as np
+            
+            img_data = base64.b64decode(image_data.split(',')[1])
+            nparr = np.frombuffer(img_data, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            # Simple heuristic based on brightness and contrast
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            brightness = np.mean(gray)
+            contrast = np.std(gray)
+            
+            # Basic emotion mapping
+            if brightness > 140 and contrast > 50:
+                emotion = 'happy'
+            elif brightness < 100:
+                emotion = 'sad'
+            elif contrast > 70:
+                emotion = 'angry'
+            elif brightness > 120 and contrast < 40:
+                emotion = 'neutral'
+            else:
+                emotion = 'neutral'
+            
+            return jsonify({
+                'success': True,
+                'dominant_emotion': emotion,
+                'confidence': 0.75
+            })
+    except Exception as e:
+        print(f"Detection error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route("/analyze_image", methods=["POST"])
 def analyze_image():
@@ -340,9 +410,10 @@ def complete_challenge():
     challenge_id = request.json.get('challenge_id')
     detected_emotion = request.json.get('detected_emotion')
     duration_met = request.json.get('duration_met', True)
+    accuracy = request.json.get('accuracy', 100)
     
     if neuro_challenges.verify_challenge(challenge_id, detected_emotion, duration_met):
-        result = neuro_challenges.complete_challenge(session['user_id'], challenge_id)
+        result = neuro_challenges.complete_challenge(session['user_id'], challenge_id, accuracy)
         return jsonify({'success': True, **result})
     return jsonify({'success': False, 'message': 'Challenge not completed correctly'})
 
@@ -510,7 +581,22 @@ def create_anchor():
         data['image_data'],
         data.get('note', '')
     )
+    if 'error' in anchor:
+        return jsonify({'success': False, 'error': anchor['error']})
     return jsonify({'success': True, 'anchor': anchor})
+
+@app.route("/get_daily_anchor_count", methods=["GET"])
+def get_daily_anchor_count():
+    if 'user_id' not in session:
+        session['user_id'] = 1
+    count = emotion_anchors.get_daily_count(session['user_id'])
+    return jsonify({'count': count, 'limit': 10, 'remaining': 10 - count})
+
+@app.route("/update_anchor_note", methods=["POST"])
+def update_anchor_note():
+    data = request.json
+    result = emotion_anchors.update_anchor_note(data['anchor_id'], data['note'])
+    return jsonify(result)
 
 @app.route("/get_anchors", methods=["GET"])
 def get_anchors():

@@ -31,9 +31,29 @@ class NeuroChallenges:
                 'description': 'Match the target emotion shown',
                 'type': 'image',
                 'target_emotion': 'surprised',
-                'duration': 5,
+                'duration': 8,
                 'reward': 20,
                 'feedback': 'You nailed it! That expression recharges your emotional intelligence score.'
+            },
+            {
+                'id': 4,
+                'name': 'Sadness Control',
+                'description': 'Show sadness for emotional range',
+                'type': 'image',
+                'target_emotion': 'sad',
+                'duration': 8,
+                'reward': 15,
+                'feedback': 'Great emotional control! Understanding sadness builds empathy.'
+            },
+            {
+                'id': 5,
+                'name': 'Anger Management',
+                'description': 'Express controlled anger',
+                'type': 'image',
+                'target_emotion': 'angry',
+                'duration': 6,
+                'reward': 18,
+                'feedback': 'Impressive! You can control intense emotions on demand.'
             }
         ]
         self.init_db()
@@ -66,10 +86,21 @@ class NeuroChallenges:
             return False
         return detected_emotion == challenge['target_emotion'] and duration_met
     
-    def complete_challenge(self, user_id, challenge_id):
+    def complete_challenge(self, user_id, challenge_id, accuracy=100):
         challenge = next((c for c in self.challenges if c['id'] == challenge_id), None)
         if not challenge:
             return None
+        
+        # Calculate coins based on accuracy
+        base_reward = challenge['reward']
+        accuracy_multiplier = accuracy / 100
+        earned_coins = int(base_reward * accuracy_multiplier)
+        
+        # Bonus for high accuracy
+        if accuracy >= 90:
+            earned_coins += 5
+        elif accuracy >= 75:
+            earned_coins += 3
         
         conn = sqlite3.connect('neurolens.db')
         c = conn.cursor()
@@ -79,12 +110,12 @@ class NeuroChallenges:
         result = c.fetchone()
         
         if result:
-            new_coins = result[0] + challenge['reward']
+            new_coins = result[0] + earned_coins
             new_streak = result[1] + 1
             c.execute('UPDATE user_stats SET coins = ?, streak = ?, last_challenge = ? WHERE user_id = ?',
                      (new_coins, new_streak, datetime.now().date(), user_id))
         else:
-            new_coins = challenge['reward']
+            new_coins = earned_coins
             new_streak = 1
             c.execute('INSERT INTO user_stats (user_id, coins, streak, last_challenge) VALUES (?, ?, ?, ?)',
                      (user_id, new_coins, new_streak, datetime.now().date()))
@@ -97,10 +128,11 @@ class NeuroChallenges:
         conn.close()
         
         return {
-            'coins_earned': challenge['reward'],
+            'coins_earned': earned_coins,
             'total_coins': new_coins,
             'streak': new_streak,
-            'feedback': challenge['feedback']
+            'feedback': challenge['feedback'],
+            'accuracy': accuracy
         }
     
     def get_user_stats(self, user_id):
