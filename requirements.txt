@@ -1,0 +1,10 @@
+tensorflow>=2.15.0
+opencv-python
+numpy
+flask
+flask-cors
+pillow
+pandas
+scikit-learn
+matplotlib
+librosa

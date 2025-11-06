@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env
+uploads/
+*.log
+.DS_Store
+temp_*.jpg
+temp_*.wav
+checkpoints/
+models/
