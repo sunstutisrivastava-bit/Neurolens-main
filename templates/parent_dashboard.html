@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Dashboard - NeuroLens</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {
+      font-family: "Rajdhani", sans-serif;
+      background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(10,15,36,0.95));
+      color: #FFFFFF;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .logo {
+      font-family: "Orbitron", monospace;
+      font-size: 2rem;
+      background: linear-gradient(45deg, #00F5FF, #B829FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logout-btn {
+      padding: 10px 20px;
+      background: linear-gradient(45deg, #FF3CAC, #B829FF);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: rgba(27,27,30,0.9);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #00F5FF;
+    }
+    .stat-label {
+      color: #B829FF;
+      margin-top: 0.5rem;
+    }
+    .section {
+      background: rgba(27,27,30,0.9);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      color: #00F5FF;
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,245,255,0.2);
+    }
+    th {
+      color: #00F5FF;
+      font-weight: 600;
+    }
+    .emotion-badge {
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    .happy {background: rgba(0,255,0,0.2); color: #00FF00;}
+    .sad {background: rgba(0,0,255,0.2); color: #4DA6FF;}
+    .angry {background: rgba(255,0,0,0.2); color: #FF6666;}
+    .neutral {background: rgba(128,128,128,0.2); color: #CCCCCC;}
+    .positive {background: rgba(0,255,0,0.2); color: #00FF00;}
+    .concerning {background: rgba(255,165,0,0.2); color: #FFA500;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">NEUROLENS - Parent Dashboard</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="dashboard">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalChildren">0</div>
+        <div class="stat-label">Children</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalEmotions">0</div>
+        <div class="stat-label">Emotion Logs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalChats">0</div>
+        <div class="stat-label">Chat Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="concerningCount">0</div>
+        <div class="stat-label">Concerning Chats</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Emotion Timeline</div>
+      <canvas id="emotionChart" height="80"></canvas>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recent Emotions</div>
+      <table id="emotionTable">
+        <thead>
+          <tr>
+            <th>Child</th>
+            <th>Emotion</th>
+            <th>Confidence</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recent Chat Conversations</div>
+      <table id="chatTable">
+        <thead>
+          <tr>
+            <th>Child</th>
+            <th>Message</th>
+            <th>Sentiment</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let emotionChart;
+
+    async function loadDashboard() {
+      const response = await fetch('/get_children_data');
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById('totalChildren').textContent = data.children.length;
+        document.getElementById('totalEmotions').textContent = data.emotions.length;
+        document.getElementById('totalChats').textContent = data.chats.length;
+        
+        const concerningCount = data.chats.filter(c => c[3] === 'concerning').length;
+        document.getElementById('concerningCount').textContent = concerningCount;
+
+        renderEmotionChart(data.emotions);
+        renderEmotionTable(data.emotions);
+        renderChatTable(data.chats);
+      }
+    }
+
+    function renderEmotionChart(emotions) {
+      const emotionCounts = {};
+      emotions.forEach(e => {
+        emotionCounts[e[1]] = (emotionCounts[e[1]] || 0) + 1;
+      });
+
+      const ctx = document.getElementById('emotionChart').getContext('2d');
+      if (emotionChart) emotionChart.destroy();
+      
+      emotionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(emotionCounts),
+          datasets: [{
+            label: 'Emotion Frequency',
+            data: Object.values(emotionCounts),
+            backgroundColor: 'rgba(0,245,255,0.5)',
+            borderColor: '#00F5FF',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {legend: {labels: {color: '#FFFFFF'}}},
+          scales: {
+            y: {ticks: {color: '#FFFFFF'}, grid: {color: 'rgba(255,255,255,0.1)'}},
+            x: {ticks: {color: '#FFFFFF'}, grid: {color: 'rgba(255,255,255,0.1)'}}
+          }
+        }
+      });
+    }
+
+    function renderEmotionTable(emotions) {
+      const tbody = document.querySelector('#emotionTable tbody');
+      tbody.innerHTML = '';
+      
+      emotions.slice(0, 20).forEach(e => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${e[0]}</td>
+          <td><span class="emotion-badge ${e[1]}">${e[1]}</span></td>
+          <td>${(e[2] * 100).toFixed(1)}%</td>
+          <td>${new Date(e[3]).toLocaleString()}</td>
+        `;
+      });
+    }
+
+    function renderChatTable(chats) {
+      const tbody = document.querySelector('#chatTable tbody');
+      tbody.innerHTML = '';
+      
+      chats.slice(0, 20).forEach(c => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${c[0]}</td>
+          <td>${c[1].substring(0, 50)}...</td>
+          <td><span class="emotion-badge ${c[3]}">${c[3]}</span></td>
+          <td>${new Date(c[4]).toLocaleString()}</td>
+        `;
+      });
+    }
+
+    function logout() {
+      window.location.href = '/logout';
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 30000);
+  </script>
+</body>
+</html>

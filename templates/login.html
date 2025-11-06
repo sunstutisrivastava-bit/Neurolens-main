@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroLens - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {
+      font-family: "Rajdhani", sans-serif;
+      background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(10,15,36,0.95));
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: rgba(27,27,30,0.9);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 20px;
+      padding: 3rem;
+      width: 90%;
+      max-width: 450px;
+    }
+    .logo {
+      font-family: "Orbitron", monospace;
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(45deg, #00F5FF, #B829FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      background: linear-gradient(45deg, #1A75FF, #B829FF);
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #00F5FF;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(45deg, #1A75FF, #B829FF);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,245,255,0.4);
+    }
+    .message {
+      margin-top: 1rem;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      display: none;
+    }
+    .error {background: rgba(255,0,0,0.2); border: 1px solid red;}
+    .success {background: rgba(0,255,0,0.2); border: 1px solid green;}
+    .hidden {display: none;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">NEUROLENS</div>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('login')">Login</div>
+      <div class="tab" onclick="showTab('register')">Register</div>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUsername" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" required>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" class="hidden">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="regUsername" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" required>
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="regRole" onchange="toggleParentCode()">
+          <option value="child">Child</option>
+          <option value="parent">Parent</option>
+        </select>
+      </div>
+      <div class="form-group" id="parentCodeGroup">
+        <label>Parent ID (ask your parent)</label>
+        <input type="number" id="parentCode">
+      </div>
+      <button type="submit">Register</button>
+    </form>
+
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (tab === 'login') {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+      } else {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+      }
+      document.getElementById('message').style.display = 'none';
+    }
+
+    function toggleParentCode() {
+      const role = document.getElementById('regRole').value;
+      document.getElementById('parentCodeGroup').style.display = role === 'child' ? 'block' : 'none';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password})
+      });
+
+      const data = await response.json();
+      const msg = document.getElementById('message');
+      
+      if (data.success) {
+        msg.className = 'message success';
+        msg.textContent = 'Login successful!';
+        msg.style.display = 'block';
+        setTimeout(() => {
+          window.location.href = data.role === 'parent' ? '/parent_dashboard' : '/child_dashboard';
+        }, 1000);
+      } else {
+        msg.className = 'message error';
+        msg.textContent = data.message;
+        msg.style.display = 'block';
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('regUsername').value;
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+      const parent_code = document.getElementById('parentCode').value;
+
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password, role, parent_code})
+      });
+
+      const data = await response.json();
+      const msg = document.getElementById('message');
+      
+      if (data.success) {
+        msg.className = 'message success';
+        msg.textContent = role === 'parent' ? `Registration successful! Your Parent ID is: ${data.user_id}` : 'Registration successful! Please login.';
+        msg.style.display = 'block';
+        setTimeout(() => showTab('login'), 2000);
+      } else {
+        msg.className = 'message error';
+        msg.textContent = data.message;
+        msg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
