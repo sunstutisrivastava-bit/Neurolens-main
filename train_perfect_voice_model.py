@@ -109,50 +109,63 @@ X_train, X_test, y_train, y_test = train_test_split(X, y_categorical, test_size=
 X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
 X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
-# Advanced hybrid model
+# Maximum accuracy hybrid model
 model = Sequential([
-    # CNN layers for feature extraction
-    Conv1D(128, 5, activation='relu', input_shape=(X_train.shape[1], 1)),
+    # Enhanced CNN layers
+    Conv1D(256, 5, activation='relu', padding='same', input_shape=(X_train.shape[1], 1)),
     BatchNormalization(),
-    Conv1D(128, 5, activation='relu'),
+    Conv1D(256, 5, activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling1D(2),
+    Dropout(0.25),
+    
+    Conv1D(512, 3, activation='relu', padding='same'),
+    BatchNormalization(),
+    Conv1D(512, 3, activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling1D(2),
+    Dropout(0.25),
+    
+    Conv1D(512, 3, activation='relu', padding='same'),
+    BatchNormalization(),
     MaxPooling1D(2),
     Dropout(0.3),
     
-    Conv1D(256, 3, activation='relu'),
+    # Enhanced Bidirectional LSTM layers
+    Bidirectional(LSTM(512, return_sequences=True, dropout=0.4, recurrent_dropout=0.4)),
     BatchNormalization(),
-    Conv1D(256, 3, activation='relu'),
-    MaxPooling1D(2),
-    Dropout(0.3),
+    Bidirectional(LSTM(256, return_sequences=True, dropout=0.4, recurrent_dropout=0.4)),
+    BatchNormalization(),
+    Bidirectional(LSTM(128, dropout=0.4, recurrent_dropout=0.4)),
+    BatchNormalization(),
     
-    # LSTM layers for temporal modeling
-    Bidirectional(LSTM(256, return_sequences=True, dropout=0.3, recurrent_dropout=0.3)),
-    Bidirectional(LSTM(128, return_sequences=True, dropout=0.3, recurrent_dropout=0.3)),
-    Bidirectional(LSTM(64, dropout=0.3, recurrent_dropout=0.3)),
-    
-    # Dense layers
-    Dense(512, activation='relu', kernel_regularizer=l2(0.001)),
+    # Enhanced Dense layers
+    Dense(1024, activation='relu', kernel_regularizer=l2(0.0005)),
     BatchNormalization(),
     Dropout(0.6),
-    Dense(256, activation='relu', kernel_regularizer=l2(0.001)),
+    Dense(512, activation='relu', kernel_regularizer=l2(0.0005)),
     BatchNormalization(),
     Dropout(0.5),
+    Dense(256, activation='relu', kernel_regularizer=l2(0.0005)),
+    BatchNormalization(),
+    Dropout(0.4),
     Dense(128, activation='relu'),
     Dropout(0.3),
     Dense(len(le.classes_), activation='softmax')
 ])
 
-# Compile with advanced optimizer
+# Compile with optimized settings
 model.compile(
-    optimizer=AdamW(learning_rate=0.001, weight_decay=0.0001),
+    optimizer=AdamW(learning_rate=0.0005, weight_decay=0.00005),
     loss='categorical_crossentropy',
-    metrics=['accuracy', 'top_k_categorical_accuracy']
+    metrics=['accuracy', 'top_k_categorical_accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
 )
 
-# Advanced callbacks
+# Maximum accuracy callbacks
 callbacks = [
-    EarlyStopping(patience=30, restore_best_weights=True, monitor='val_accuracy'),
-    ReduceLROnPlateau(factor=0.1, patience=15, min_lr=1e-8, monitor='val_accuracy'),
-    ModelCheckpoint(os.path.join(save_dir, "perfect_voice_model.h5"), save_best_only=True, monitor='val_accuracy')
+    EarlyStopping(patience=50, restore_best_weights=True, monitor='val_accuracy', min_delta=0.0001),
+    ReduceLROnPlateau(factor=0.2, patience=20, min_lr=1e-9, monitor='val_accuracy', verbose=1),
+    ModelCheckpoint(os.path.join(save_dir, "perfect_voice_model.h5"), save_best_only=True, monitor='val_accuracy', verbose=1)
 ]
 
 print("Training perfect voice model...")
@@ -160,23 +173,54 @@ print(f"Training samples: {len(X_train)}")
 print(f"Test samples: {len(X_test)}")
 print(f"Classes: {le.classes_}")
 
-# Train with extensive epochs
+# Train with maximum epochs and data augmentation
+print("\n" + "="*80)
+print("🚀 TRAINING FOR MAXIMUM ACCURACY")
+print("="*80)
+print(f"Model Parameters: {model.count_params():,}")
+print(f"Architecture: CNN-BiLSTM Hybrid with BatchNorm & Dropout")
+print(f"Optimizer: AdamW with weight decay")
+print(f"Max Epochs: 300 (with early stopping)")
+print("="*80 + "\n")
+
 history = model.fit(
     X_train, y_train,
     validation_data=(X_test, y_test),
-    epochs=200,
-    batch_size=16,
+    epochs=300,
+    batch_size=8,
     callbacks=callbacks,
-    verbose=1
+    verbose=1,
+    class_weight='balanced'
 )
 
-# Evaluate
-test_loss, test_accuracy = model.evaluate(X_test, y_test)
-print(f"Final test accuracy: {test_accuracy:.6f}")
+# Comprehensive evaluation
+print("\n" + "="*80)
+print("📊 FINAL EVALUATION")
+print("="*80)
+test_results = model.evaluate(X_test, y_test, verbose=0)
+test_loss = test_results[0]
+test_accuracy = test_results[1]
+test_top_k = test_results[2]
+test_precision = test_results[3]
+test_recall = test_results[4]
+
+print(f"Test Loss: {test_loss:.6f}")
+print(f"Test Accuracy: {test_accuracy*100:.2f}%")
+print(f"Top-K Accuracy: {test_top_k*100:.2f}%")
+print(f"Precision: {test_precision*100:.2f}%")
+print(f"Recall: {test_recall*100:.2f}%")
+print(f"F1-Score: {2*(test_precision*test_recall)/(test_precision+test_recall)*100:.2f}%")
+print("="*80)
 
 # Save label encoder
 import pickle
 with open(os.path.join(save_dir, 'voice_label_encoder.pkl'), 'wb') as f:
     pickle.dump(le, f)
 
-print("✅ Perfect voice model training complete!")
+print("\n" + "="*80)
+print("✅ MAXIMUM ACCURACY VOICE MODEL TRAINING COMPLETE!")
+print("="*80)
+print(f"Final Accuracy: {test_accuracy*100:.2f}%")
+print(f"Model saved to: {os.path.join(save_dir, 'perfect_voice_model.h5')}")
+print(f"Label encoder saved to: {os.path.join(save_dir, 'voice_label_encoder.pkl')}")
+print("="*80 + "\n")
